@@ -1,0 +1,112 @@
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { supabase } from '../lib/supabase';
+import { useStore } from '../store';
+
+
+export function ImagierThemeDetail() {
+  const navigate = useNavigate();
+  const themeGroup = useStore((state) => state.themeGroup);
+  const [themes, setThemes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const gameProgress = useStore((state) => state.gameProgress)
+  const [themeName, setThemeName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const themeParam = params.get('theme');
+
+    if (themeParam) {
+      setThemeName(themeParam);
+    }
+
+    if (!themeGroup) {
+      setError('Aucun ID de groupe de thèmes fourni.');
+      setLoading(false);
+      return;
+    }
+
+    const fetchThemes = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const { data, error } = await supabase
+          .from('themes')
+          .select('id, name')
+          .eq('theme_group_id', themeGroup)
+          .order('order', { ascending: true });
+
+        if (error) {
+          throw error;
+        }
+
+        setThemes(data || []);
+      } catch (err) {
+        setError('Erreur lors du chargement des thèmes.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchThemes();
+  }, [themeGroup]);
+
+  const handleThemeSelection = (themeId: any) => {
+    useStore.getState().setTheme(themeId);
+    navigate(`/imagier-game?id:${themeId}`); // Redirige vers la page de jeu
+  };
+
+  return (
+    <div className="min-h-screen bg-background p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-4xl mx-auto"
+      >
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-pink">{themeName}</h1>
+            <button
+              onClick={() => navigate('/rewards')}
+              className="text-lg btn-secondary"
+            >
+              Pièces d'or : {gameProgress.coins}
+            </button>
+          </div>
+          <button onClick={() => navigate('/imagier')} className="btn-secondary">
+            Retour
+          </button>
+        </div>
+
+        <div className="card mb-6">
+          {loading ? (
+            <p className="text-center text-gray-600">Chargement des thèmes...</p>
+          ) : error ? (
+            <p className="text-center text-red-600">{error}</p>
+          ) : themes.length === 0 ? (
+            <p className="text-center text-gray-600">Aucun thème disponible.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {themes.map((theme) => (
+                <button
+                  key={theme.id}
+                  onClick={() => handleThemeSelection(theme.id)}
+                  className="btn-primary w-full flex items-center justify-center"
+                >
+                  {theme.icon && (
+                    <img src={theme.icon} alt={theme.name} className="w-6 h-6" />
+                  )}
+                  <span>{theme.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+}

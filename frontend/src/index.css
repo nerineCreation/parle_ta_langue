@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #f7f6cf;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-pink text-black px-6 py-3 rounded-full font-semibold shadow-lg 
+           hover:opacity-90 transition-all duration-200 ease-in-out;
+  }
+
+  .btn-secondary {
+    @apply bg-blue text-black px-6 py-3 rounded-full font-semibold shadow-lg 
+           hover:opacity-90 transition-all duration-200 ease-in-out;
+  }
+
+  .card {
+    @apply bg-white p-6 rounded-2xl shadow-xl;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2 rounded-lg border-2 border-pastel-pink focus:border-pink 
+           focus:outline-none transition-colors duration-200;
+  }
+}
