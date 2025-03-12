@@ -59,10 +59,12 @@ export interface Themes {
   order: number;
   theme_group_id: string;
   created_at: string;
+  icon: string;
 }
 
 export interface ThemeGroup {
   id: string;
   name: string;
   created_at: string;
+  icon: string;
 }

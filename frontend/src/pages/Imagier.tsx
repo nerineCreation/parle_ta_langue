@@ -33,7 +33,7 @@ export function Imagier() {
         // Charger les thèmes parents depuis la table "theme_group"
         const { data: parentThemes, error: parentThemesError } = await supabase
           .from('theme_group')
-          .select('id, name')
+          .select('id, name, icon')
           .eq('is_active', 'true')
           .order('name', { ascending: true });
 
@@ -137,7 +137,7 @@ export function Imagier() {
                     }
                     
                     useStore.getState().setTheme(data.id);
-                    navigate(`/imagier-game?theme=${data.id}`);
+                    navigate(`/imagier-game`);
                   } else {
                     console.warn("Aucun sous-thème disponible pour ce thème.");
                   }
@@ -149,6 +149,7 @@ export function Imagier() {
                     onClick={handleNavigation}
                     className="btn-primary w-full flex items-center justify-center"
                   >
+                    <div className="text-4xl mb-4">{theme.icon}</div>
                     <span>{theme.name}</span>
                   </button>
                 );

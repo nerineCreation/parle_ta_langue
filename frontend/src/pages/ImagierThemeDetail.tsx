@@ -35,7 +35,7 @@ export function ImagierThemeDetail() {
       try {
         const { data, error } = await supabase
           .from('themes')
-          .select('id, name')
+          .select('id, name, icon')
           .eq('theme_group_id', themeGroup)
           .order('order', { ascending: true });
 
@@ -97,9 +97,7 @@ export function ImagierThemeDetail() {
                   onClick={() => handleThemeSelection(theme.id)}
                   className="btn-primary w-full flex items-center justify-center"
                 >
-                  {theme.icon && (
-                    <img src={theme.icon} alt={theme.name} className="w-6 h-6" />
-                  )}
+                  <div className="text-4xl mb-4">{theme.icon}</div>
                   <span>{theme.name}</span>
                 </button>
               ))}

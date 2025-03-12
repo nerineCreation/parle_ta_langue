@@ -5,13 +5,26 @@ import { useStore } from "../store";
 import { supabase } from "../lib/supabase";
 import Confetti from "react-confetti";
 
+type GameProgress = {
+  child_id: string;
+  theme_id: string;
+  language_id: string;
+  completed_items: number;
+  score: number;
+  last_played_at: string;
+  created_at: string;
+};
+
 export function ImagierGame() {
   const navigate = useNavigate();
   const currentLanguage = useStore((state) => state.currentLanguage);
   const currentChild = useStore((state) => state.currentChild);
   const themeId = useStore((state) => state.theme);
-  const updateGameProgress = useStore((state) => state.updateGameProgress);
-  const gameProgress = useStore((state) => state.gameProgress);
+  // Nous n'utilisons plus gameProgress depuis le store directement,
+  // on le charge depuis la table "game_progress"
+  const [gameProgress, setGameProgress] = useState<GameProgress | null>(null);
+  // On conserve updateGameProgress pour mettre à jour le store en complément
+  const updateGameProgressStore = useStore((state) => state.updateGameProgress);
 
   const [images, setImages] = useState(
     [] as { id: string; url: string; word: string; fileName: string }[]
@@ -47,9 +60,32 @@ export function ImagierGame() {
     pulse: { scale: [1, 1.2, 1], opacity: 1, transition: { duration: 1 } },
   };
 
-  // Fonction utilitaire pour obtenir un index aléatoire dans le tableau d'images
+  // Fonction pour obtenir un index aléatoire parmi les images
   const getRandomIndex = () => Math.floor(Math.random() * images.length);
 
+  // Récupération de la progression de l'enfant depuis la table "game_progress"
+  useEffect(() => {
+    const fetchGameProgress = async () => {
+      if (currentChild && currentLanguage && themeId) {
+        const { data, error } = await supabase
+          .from("game_progress")
+          .select("*")
+          .eq("child_id", currentChild.id)
+          .eq("theme_id", themeId)
+          .eq("language_id", currentLanguage.id)
+          .single();
+        if (error) {
+          console.error("Erreur lors de la récupération de la progression :", error);
+        } else {
+          setGameProgress(data);
+        }
+      }
+    };
+
+    fetchGameProgress();
+  }, [currentChild, currentLanguage, themeId]);
+
+  // Chargement des images depuis la table "imagier"
   useEffect(() => {
     const fetchImages = async () => {
       setLoading(true);
@@ -91,7 +127,6 @@ export function ImagierGame() {
       });
 
       setImages(formattedImages);
-      // Choix initial aléatoire
       setCurrentIndex(Math.floor(Math.random() * formattedImages.length));
       setLoading(false);
     };
@@ -99,7 +134,7 @@ export function ImagierGame() {
     fetchImages();
   }, [currentLanguage, themeId]);
 
-  // Générer des options de réponse (3 mauvaises et 1 bonne)
+  // Génération des options de réponse
   useEffect(() => {
     if (images.length > 0) {
       const correctWord = images[currentIndex]?.word;
@@ -120,30 +155,41 @@ export function ImagierGame() {
       // Réponse correcte
       setIsCorrect(true);
       setShowConfetti(true);
-
-      // Mise à jour du score pour l'enfant connecté
-      const newCoins = useStore.getState().gameProgress.coins + 1;
-      updateGameProgress({ coins: newCoins });
+  
+      // Calcul du nouveau score
+      const newCoins = (gameProgress?.score || 0) + 1;
+      setGameProgress((prev) => (prev ? { ...prev, score: newCoins } : null));
+      updateGameProgressStore({ coins: newCoins });
+      
       if (currentChild) {
+        // Utilisation de upsert pour mettre à jour ou insérer la ligne
         supabase
           .from("game_progress")
-          .update({ coins: newCoins })
-          .eq("child_id", currentChild.id)
+          .upsert(
+            {
+              child_id: currentChild.id,
+              theme_id: themeId,
+              language_id: currentLanguage.id,
+              score: newCoins,
+              last_played_at: new Date().toISOString(),
+            },
+            { onConflict: ["child_id", "theme_id", "language_id"] }
+          )
           .then(({ error }) => {
             if (error) {
               console.error("Erreur lors de la mise à jour du score :", error);
             }
           });
       }
-
+  
       // Séquence d'animation :
-      // 1. Affichage des confettis pendant 1 seconde
+      // 1. Afficher les confettis pendant 1 seconde
       setTimeout(() => {
         setShowConfetti(false);
-        // 2. Affichage de la pièce d'or et animation de l'image
+        // 2. Afficher la pièce d'or et animer l'image (pulse)
         setShowCoinAnimation(true);
         setAnimateImage(true);
-        // 3. Après 1,5 seconde, on arrête l'animation et on change d'image
+        // 3. Après 1,5 seconde, arrêter l'animation et passer à l'image suivante
         setTimeout(() => {
           setShowCoinAnimation(false);
           setAnimateImage(false);
@@ -174,7 +220,7 @@ export function ImagierGame() {
         }, 4000);
       }
     }
-  };
+  };  
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -191,21 +237,14 @@ export function ImagierGame() {
         />
       )}
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto text-center"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto text-center">
         <div className="flex justify-between items-center mb-8">
           <div className="flex flex-col items-start">
             <h1 className="text-4xl font-bold text-pink">
               Trouve le mot correspondant à l'image
             </h1>
-            <button
-              onClick={() => navigate('/rewards')}
-              className="text-lg btn-secondary"
-            >
-              Pièces d'or : {gameProgress.coins}
+            <button onClick={() => navigate('/rewards')} className="text-lg btn-secondary">
+              Pièces d'or : {gameProgress ? gameProgress.score : 0}
             </button>
           </div>
           <button onClick={() => navigate('/imagier')} className="btn-secondary">
@@ -249,7 +288,6 @@ export function ImagierGame() {
               </AnimatePresence>
             </motion.div>
 
-            {/* Affichage des boutons 2 à 2 */}
             <div className="grid grid-cols-2 gap-4">
               {options.map((word, index) => (
                 <motion.button
@@ -267,7 +305,7 @@ export function ImagierGame() {
                   }
                   className={`p-4 font-bold uppercase rounded-lg shadow-md transition-all duration-200 text-black ${
                     showCorrectAnswer && word === images[currentIndex]?.word
-                      ? "bg-blue"
+                      ? "bg-blue-500"
                       : isCorrect === false && selectedWord === word
                       ? "bg-rose-600"
                       : isCorrect === true && word === images[currentIndex]?.word
