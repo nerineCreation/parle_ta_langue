@@ -159,7 +159,7 @@ export function Dashboard() {
                         id: lang.language_id,
                         name: lang.language_name || "Nom inconnu"
                       });
-                      navigate(`/game`);
+                      navigate(`/game?id=${lang.language_id}`);
                     }}
                     className="btn-primary w-full"
                   >
