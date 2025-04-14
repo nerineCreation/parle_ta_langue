@@ -5,27 +5,12 @@ import { useStore } from "../store";
 import { supabase } from "../lib/supabase";
 import Confetti from "react-confetti";
 
-type GameProgress = {
-  child_id: string;
-  theme_id: string;
-  language_id: string;
-  completed_items: number;
-  score: number;
-  last_played_at: string;
-  created_at: string;
-};
-
 export function ImagierGame() {
   const navigate = useNavigate();
   const currentLanguage = useStore((state) => state.currentLanguage);
   const currentChild = useStore((state) => state.currentChild);
   const themeId = useStore((state) => state.theme);
-  // Nous n'utilisons plus gameProgress depuis le store directement,
-  // on le charge depuis la table "game_progress"
-  const [gameProgress, setGameProgress] = useState<GameProgress | null>(null);
-  // On conserve updateGameProgress pour mettre à jour le store en complément
-  const updateGameProgressStore = useStore((state) => state.updateGameProgress);
-
+  const gameProgress = useStore((state) => state.gameProgress);
   const [images, setImages] = useState(
     [] as { id: string; url: string; word: string; fileName: string }[]
   );
@@ -65,19 +50,27 @@ export function ImagierGame() {
 
   // Récupération de la progression de l'enfant depuis la table "game_progress"
   useEffect(() => {
+    if (!currentChild) {
+      navigate('/profiles');
+      return;
+    }
+    if (!currentLanguage) {
+      navigate('/dashboard');
+      return;
+    }
+
     const fetchGameProgress = async () => {
       if (currentChild && currentLanguage && themeId) {
         const { data, error } = await supabase
           .from("game_progress")
           .select("*")
           .eq("child_id", currentChild.id)
-          .eq("theme_id", themeId)
-          .eq("language_id", currentLanguage.id)
+          .eq("language_id", currentLanguage)
           .single();
         if (error) {
           console.error("Erreur lors de la récupération de la progression :", error);
         } else {
-          setGameProgress(data);
+          useStore.getState().setGameProgress(data);
         }
       }
     };
@@ -158,8 +151,7 @@ export function ImagierGame() {
   
       // Calcul du nouveau score
       const newCoins = (gameProgress?.score || 0) + 1;
-      setGameProgress((prev) => (prev ? { ...prev, score: newCoins } : null));
-      updateGameProgressStore({ coins: newCoins });
+      useStore.getState().setGameProgress({ score: newCoins });
       
       if (currentChild) {
         // Utilisation de upsert pour mettre à jour ou insérer la ligne
@@ -169,7 +161,7 @@ export function ImagierGame() {
             {
               child_id: currentChild.id,
               theme_id: themeId,
-              language_id: currentLanguage.id,
+              language_id: currentLanguage,
               score: newCoins,
               last_played_at: new Date().toISOString(),
             },

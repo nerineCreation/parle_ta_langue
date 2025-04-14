@@ -10,6 +10,7 @@ import { LanguageManagement } from './pages/LanguageManagement'
 import LanguageUnlock from './pages/LanguageUnlock'
 import { ImagierThemeDetail } from './pages/ImagierThemeDetail'
 import { ImagierGame } from './pages/ImagierGame'
+import { ImagierShow } from './pages/ImagierShow'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Rewards } from './pages/Rewards'
 import { auth } from './lib/auth'
@@ -27,11 +28,12 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/profiles" element={<ProtectedRoute><ChildProfiles /></ProtectedRoute>} />
         <Route path="/game" element={<ProtectedRoute><GameInterface /></ProtectedRoute>} />
-        <Route path="/imagier" element={<ProtectedRoute><Imagier /></ProtectedRoute>} />
         <Route path="/languages" element={<ProtectedRoute><LanguageManagement /></ProtectedRoute>} />
         <Route path="/language-unlock" element={<ProtectedRoute><LanguageUnlock /></ProtectedRoute>} />
+        <Route path="/imagier" element={<ProtectedRoute><Imagier /></ProtectedRoute>} />
         <Route path="/imagier-theme-detail" element={<ProtectedRoute><ImagierThemeDetail /></ProtectedRoute>} />
         <Route path="/imagier-game" element={<ProtectedRoute><ImagierGame /></ProtectedRoute>} />
+        <Route path="/imagier-show" element={<ProtectedRoute><ImagierShow /></ProtectedRoute>} />
         <Route path="/rewards" element={<ProtectedRoute><Rewards /></ProtectedRoute>} />
       </Routes>
     </Router>

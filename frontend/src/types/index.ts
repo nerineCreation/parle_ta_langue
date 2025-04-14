@@ -32,8 +32,8 @@ export interface ParentLanguage {
   parent_id: string;
   activated_at: string | null;
   created_at: string;
-  language_code_id: string;
-  language_name: string;
+  language_id?: string;
+  language_name?: string;
 }
 
 export interface Reward {
@@ -47,11 +47,13 @@ export interface Reward {
 
 export interface GameProgress {
   child_id: string;
-  coins: number;
-  completed_activities: string[];
-  unlocked_rewards: string[];
-  language_id?: string;
-}
+  theme_id: string;
+  language_id: string;
+  completed_items: any; // selon le format que vous souhaitez (par exemple, un nombre ou un tableau)
+  score: number;
+  last_played_at: string;
+  created_at: string;
+};
 
 export interface Themes {
   id: string;

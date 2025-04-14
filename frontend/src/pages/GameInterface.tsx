@@ -4,15 +4,6 @@ import { motion } from 'framer-motion'
 import { useStore } from '../store'
 import { supabase } from '../lib/supabase'
 
-type GameProgress = {
-  child_id: string;
-  theme_id: string;
-  language_id: string;
-  completed_items: any; // selon le format que vous souhaitez (par exemple, un nombre ou un tableau)
-  score: number;
-  last_played_at: string;
-  created_at: string;
-};
 
 export function GameInterface() {
   const navigate = useNavigate();
@@ -20,7 +11,7 @@ export function GameInterface() {
   const currentChild = useStore((state) => state.currentChild);
   const currentLanguage = useStore((state) => state.currentLanguage);
   const themeId = useStore((state) => state.theme);
-  const [gameProgress, setGameProgress] = useState<GameProgress | null>(null);
+  const gameProgress = useStore((state) => state.gameProgress);
   const [activities, setActivities] = useState<
     { id: string; name: string; icon: string; path?: string }[]
   >([]);
@@ -57,8 +48,7 @@ export function GameInterface() {
         .from('game_progress')
         .select('*')
         .eq('child_id', currentChild.id)
-        .eq('theme_id', themeId)
-        .eq('language_id', currentLanguage.id)
+        .eq('language_id', currentLanguage)
         .single();
 
       if (error) {
@@ -66,7 +56,7 @@ export function GameInterface() {
         return;
       }
       if (data) {
-        setGameProgress(data);
+        useStore.getState().setGameProgress(data);
       }
     };
 

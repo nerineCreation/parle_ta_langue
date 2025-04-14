@@ -27,7 +27,7 @@ export function Dashboard() {
           language_code_id,
           activated_at,
           created_at,
-          languages_code!inner ( language_id, code )
+          language_name
         `)
         .eq('parent_id', user.id);
       
@@ -43,7 +43,7 @@ export function Dashboard() {
         language_code_id: pl.language_code_id, // ✅ ID de la table "languages_code"
         activated_at: pl.activated_at, // ✅ Date d'activation
         created_at: pl.created_at, // ✅ Date de création
-        language_id: pl.languages_code.language_id // ✅ Correctement récupéré depuis "languages_code"
+        language_name: pl.language_name, 
       }));
       
       useStore.getState().setParentLanguages(formattedLanguages);
@@ -145,27 +145,32 @@ export function Dashboard() {
             </div>
           )}
         </div>
-          {selectedChild && availableLanguages.length > 1 && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-lg p-6 max-w-lg w-full">
-                <h2 className="text-2xl font-semibold mb-4 text-center">Choisissez une langue</h2>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {availableLanguages.map((lang) => (
-                    <button
-                      key={lang.id}
-                      onClick={() => navigate(`/game`)} // ✅ Passer l'ID de la langue
-                      className="btn-primary w-full"
-                    >
-                      {lang.language_name}
-                    </button>
-                  ))}
-                </div>
-                <button onClick={() => setSelectedChild(null)} className="btn-secondary w-full mt-4">
-                  Annuler
-                </button>
+        {selectedChild && availableLanguages.length > 1 && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg p-6 max-w-lg w-full">
+              <h2 className="text-2xl font-semibold mb-4 text-center">Choisissez une langue</h2>
+              <div className="grid gap-4 md:grid-cols-2">
+                {availableLanguages.map((lang) => (
+                  <button
+                    key={lang.id}
+                    onClick={() => {
+                      // Mettre à jour l'enfant courant et la langue active dans le store
+                      useStore.getState().setCurrentChild(selectedChild);
+                      useStore.getState().setCurrentLanguage(lang.id); // ou lang.language_id si votre structure inclut language_id
+                      navigate(`/game`);
+                    }}
+                    className="btn-primary w-full"
+                  >
+                    {lang.language_name}
+                  </button>
+                ))}
               </div>
+              <button onClick={() => setSelectedChild(null)} className="btn-secondary w-full mt-4">
+                Annuler
+              </button>
             </div>
-          )}
+          </div>
+        )}
       </motion.div>
     </div>
   );

@@ -20,7 +20,7 @@ interface AppState {
   setCurrentLanguage: (language: LanguagesCode | null) => void  // Ajout du setter
   setTheme: (theme: Themes | null) => void 
   setThemeGroup: (themeGroup: ThemeGroup | null) => void 
-  updateGameProgress: (progress: Partial<GameProgress>) => void
+  setGameProgress: (progress: Partial<GameProgress>) => void
   logout: () => Promise<void>
 }
 
@@ -33,7 +33,7 @@ export const useStore = create<AppState>((set) => ({
   currentLanguage: null, // Valeur par défaut
   theme: null,
   themeGroup: null,
-    gameProgress: {
+  gameProgress: {
     child_id: '',
     coins: 0,
     completed_activities: [],
@@ -47,7 +47,7 @@ export const useStore = create<AppState>((set) => ({
   setCurrentLanguage: (language) => set({ currentLanguage: language }), // Setter ajouté
   setTheme: (theme) => set({ theme }),
   setThemeGroup: (themeGroup) => set({themeGroup}),
-  updateGameProgress: (progress) =>
+  setGameProgress: (progress) =>
     set((state) => ({
       gameProgress: { ...state.gameProgress, ...progress },
     })),

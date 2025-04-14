@@ -11,12 +11,24 @@ export function ImagierThemeDetail() {
   const [themes, setThemes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const gameProgress = useStore((state) => state.gameProgress)
+  const gameProgress = useStore((state) => state.gameProgress);
+  const currentChild = useStore((state) => state.currentChild);
+  const currentLanguage = useStore((state) => state.currentLanguage);
   const [themeName, setThemeName] = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const themeParam = params.get('theme');
+
+    if (!currentChild) {
+      navigate('/profiles');
+      return;
+    }
+
+    if (!currentLanguage) {
+      navigate('/dashboard');
+      return;
+    }
 
     if (themeParam) {
       setThemeName(themeParam);
@@ -37,6 +49,7 @@ export function ImagierThemeDetail() {
           .from('themes')
           .select('id, name, icon')
           .eq('theme_group_id', themeGroup)
+          .eq('is_active', true)
           .order('order', { ascending: true });
 
         if (error) {
@@ -51,13 +64,32 @@ export function ImagierThemeDetail() {
         setLoading(false);
       }
     };
+    
+    // Chargement de la progression de l'enfant pour le thème et la langue sélectionnés
+    const fetchGameProgress = async () => {
+      const { data, error } = await supabase
+        .from('game_progress')
+        .select('*')
+        .eq('child_id', currentChild.id)
+        .eq('language_id', currentLanguage)
+        .single();
+
+      if (error) {
+        console.error('Erreur lors de la récupération de la progression du jeu :', error);
+        return;
+      }
+      if (data) {
+        useStore.getState().setGameProgress(data);
+      }
+    };
 
     fetchThemes();
+    fetchGameProgress();
   }, [themeGroup]);
 
   const handleThemeSelection = (themeId: any) => {
     useStore.getState().setTheme(themeId);
-    navigate(`/imagier-game?id:${themeId}`); // Redirige vers la page de jeu
+    navigate(`/imagier-show?id:${themeId}`); // Redirige vers la page de jeu
   };
 
   return (
@@ -74,7 +106,7 @@ export function ImagierThemeDetail() {
               onClick={() => navigate('/rewards')}
               className="text-lg btn-secondary"
             >
-              Pièces d'or : {gameProgress.coins}
+              Pièces d'or : {gameProgress ? gameProgress.score : 0}
             </button>
           </div>
           <button onClick={() => navigate('/imagier')} className="btn-secondary">

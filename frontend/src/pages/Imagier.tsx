@@ -77,7 +77,26 @@ export function Imagier() {
       }
     };
 
+    // Chargement de la progression de l'enfant pour le thème et la langue sélectionnés
+    const fetchGameProgress = async () => {
+      const { data, error } = await supabase
+        .from('game_progress')
+        .select('*')
+        .eq('child_id', currentChild.id)
+        .eq('language_id', currentLanguage)
+        .single();
+
+      if (error) {
+        console.error('Erreur lors de la récupération de la progression du jeu :', error);
+        return;
+      }
+      if (data) {
+        useStore.getState().setGameProgress(data);
+      }
+    };
+
     loadThemes();
+    fetchGameProgress();
   }, [currentChild, navigate]);
 
   if (!currentChild || !currentLanguage) return null;
@@ -96,11 +115,11 @@ export function Imagier() {
               onClick={() => navigate('/rewards')}
               className="text-lg btn-secondary"
             >
-              Pièces d'or : {gameProgress.coins}
+              Pièces d'or : {gameProgress ? gameProgress.score : 0}
             </button>
           </div>
           <button
-            onClick={() => navigate(`/game`)}
+            onClick={() => navigate(`/dashboard`)}
             className="btn-secondary"
           >
             Retour

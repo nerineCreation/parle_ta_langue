@@ -38,10 +38,7 @@ export function LanguageManagement() {
       // Charger les activations du parent depuis parent_languages, joint à languages_code
       const { data: parentLangData, error: parentLangError } = await supabase
         .from('parent_languages')
-        .select(`
-          *,
-          language_code_id:languages_code(*)
-        `)
+        .select(`*, language_code_id:languages_code(*)`)
         .eq('parent_id', user.id);
       if (parentLangError) throw parentLangError;
 
@@ -55,8 +52,8 @@ export function LanguageManagement() {
           return {
             id: pl.id,
             parent_id: pl.parent_id,
-            language_code_id: pl.language_code_id,
-            language_name: languageName, // ✅ S'assurer que c'est une chaîne de caractères
+            language_id: pl.language_code_id,
+            language_name: languageName, 
             activated_at: pl.activated_at || null,
             created_at: pl.created_at || null,
           };
@@ -85,22 +82,34 @@ export function LanguageManagement() {
         .select('id, language_id')
         .eq('code', activationCode.toUpperCase())
         .maybeSingle();
-console.log('langCode:', langCode);
-console.log('langCodeError:', langCodeError);
   
       if (langCodeError) {
-        throw new Error(`Erreur lors de la vérification du code. AH AH : ${langCode}`);
+        throw new Error(`Erreur lors de la vérification du code.`);
       }
   
       if (!langCode || !langCode.language_id) {
-        throw new Error(`Ce code d'activation est invalide AH AH : ${langCode}`);
+        throw new Error(`Ce code d'activation est invalide.`);
+      }
+  
+      // Récupérer le nom de la langue depuis la table "languages" via language_id
+      const { data: languageData, error: languageError } = await supabase
+        .from('languages')
+        .select('name')
+        .eq('id', langCode.language_id)
+        .maybeSingle();
+  
+      if (languageError) {
+        throw new Error("Erreur lors de la récupération du nom de la langue.");
+      }
+      if (!languageData || !languageData.name) {
+        throw new Error("Nom de langue introuvable.");
       }
   
       // Vérifier que le parent n'a pas déjà activé cette langue
       const { data: existingActivation, error: existingError } = await supabase
         .from('parent_languages')
         .select('id')
-        .eq('language_code_id', langCode.id) // Vérifie bien avec `languages_code.id`
+        .eq('language_code_id', langCode.id)
         .eq('parent_id', user.id)
         .maybeSingle();
   
@@ -112,12 +121,13 @@ console.log('langCodeError:', langCodeError);
         throw new Error("Vous avez déjà activé cette langue.");
       }
   
-      // Ajouter l'activation dans parent_languages
+      // Ajouter l'activation dans parent_languages en insérant language_name récupéré depuis la table languages
       const { error: insertError } = await supabase
         .from('parent_languages')
         .insert([{
           parent_id: user.id,
-          language_code_id: langCode.id, // Utilise bien languages_code.id et non languages.id
+          language_code_id: langCode.id, // utilise languages_code.id
+          language_name: languageData.name, // récupéré depuis la table languages
         }]);
   
       if (insertError) {
@@ -205,10 +215,10 @@ console.log('langCodeError:', langCodeError);
             {activatedLanguages.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {activatedLanguages.map((pl) => {
-                  const language = pl.language_code_id;
+                  const language = pl.language_id;
                   if (!language) return null;
                   return (
-                    <div key={pl.id} className="p-4 rounded-lg bg-pastel-pink">
+                    <div key={pl.id} className="p-4 rounded-lg bg-pastel-pink text-center">
                       {typeof pl.language_name === 'string' ? pl.language_name : 'Nom inconnu'}
 
                     </div>
