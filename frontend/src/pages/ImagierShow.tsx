@@ -29,7 +29,7 @@ export function ImagierShow() {
       const { data, error } = await supabase
         .from("imagier")
         .select("id, file_name, translate")
-        .eq("language_id", currentLanguage)
+        .eq("language_id", currentLanguage.id)
         .eq("theme_id", themeId)
         .order("file_name");
       if (error) {
@@ -63,8 +63,8 @@ export function ImagierShow() {
         .from("game_progress")
         .select("*")
         .eq("child_id", currentChild.id)
-        .eq("language_id", currentLanguage)
-        .single();
+        .eq("language_id", currentLanguage.id)
+        .maybeSingle();
         if (error) {
           console.error("Erreur lors de la récupération de la progression :", error);
         } else {
@@ -106,7 +106,7 @@ export function ImagierShow() {
               onClick={() => navigate('/rewards')}
               className="text-lg btn-secondary"
             >
-              Pièces d'or : {gameProgress ? gameProgress.score : 0}
+              Pièces d'or : {gameProgress?.score ?? 0}
             </button>
           </div>
           <button
@@ -118,7 +118,7 @@ export function ImagierShow() {
         </div>
 
         <div className="card mb-6">
-          <p className="text-lg mb-4"><b>Ecoute et répète avec moi ! {currentLanguage} | {themeId}</b></p>
+          <p className="text-lg mb-4"><b>Ecoute et répète avec moi !</b></p>
           {loading ? (
             <p className="text-lg text-gray-600">Chargement des images...</p>
             ) : images.length === 0 ? (

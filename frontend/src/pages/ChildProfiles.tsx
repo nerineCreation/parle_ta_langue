@@ -81,6 +81,12 @@ export function ChildProfiles() {
 
       if (error) throw error;
 
+      // Supprimer l'enregistrement correspondant dans game_progress pour cet enfant
+      await supabase
+        .from("game_progress")
+        .delete()
+        .eq("child_id", childId);
+        
       // Recharger la liste des enfants après suppression
       const { data, error: fetchError } = await supabase
         .from("child_profiles")
@@ -95,6 +101,8 @@ export function ChildProfiles() {
     } finally {
       setLoading(false);
     }
+
+    
   };
 
   return (

@@ -1,67 +1,67 @@
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { useStore } from '../store';
-import { auth } from '../lib/auth';
-import { useState, useEffect } from 'react';
-import type { ChildProfile, ParentLanguage } from '../types';
-import { supabase } from '../lib/supabase';
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { useStore } from '../store'
+import { auth } from '../lib/auth'
+import type { ChildProfile, ParentLanguage } from '../types'
+import { supabase } from '../lib/supabase'
 
 export function Dashboard() {
-  const navigate = useNavigate();
-  const user = useStore((state) => state.user);
-  const children = useStore((state) => state.children);
-  const parentLanguages = useStore((state) => state.parentLanguages);
-  const [selectedChild, setSelectedChild] = useState<ChildProfile | null>(null);
-  const [availableLanguages, setAvailableLanguages] = useState<ParentLanguage[]>([]);
-  const [bubulleUrls, setBubulleUrls] = useState<Record<string, string>>({});
+  const navigate = useNavigate()
+  const user = useStore((state) => state.user)
+  const children = useStore((state) => state.children)
+  const parentLanguages = useStore((state) => state.parentLanguages)
+  const [selectedChild, setSelectedChild] = useState<ChildProfile | null>(null)
+  const [availableLanguages, setAvailableLanguages] = useState<ParentLanguage[]>([])
+  const [bubulleUrls, setBubulleUrls] = useState<Record<string, string>>({})
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) return
 
     const fetchLanguages = async () => {
       const { data, error } = await supabase
         .from('parent_languages')
         .select(`
-          id,
-          parent_id,
-          language_code_id,
-          activated_at,
-          created_at,
-          language_name
+          *,
+          languages_code!inner(language_id)
         `)
-        .eq('parent_id', user.id);
+        .eq('parent_id', user.id)
       
       if (error) {
-        console.error('Erreur lors de la récupération des langues activées:', error);
+        console.error('Erreur lors de la récupération des langues activées:', error)
         return;
       }
       
-      // 🛠 Transformer les données pour correspondre exactement à ParentLanguage
+      // Transformer les données pour correspondre à ParentLanguage
       const formattedLanguages: ParentLanguage[] = data.map(pl => ({
-        id: pl.id, // ✅ ID de la table "parent_languages"
-        parent_id: pl.parent_id, // ✅ ID du parent
-        language_code_id: pl.language_code_id, // ✅ ID de la table "languages_code"
-        activated_at: pl.activated_at, // ✅ Date d'activation
-        created_at: pl.created_at, // ✅ Date de création
-        language_name: pl.language_name, 
+        id: pl.id, // ID de la table "parent_languages"
+        parent_id: pl.parent_id,
+        language_code_id: pl.language_code_id,
+        activated_at: pl.activated_at,
+        created_at: pl.created_at,
+        language_name: pl.language_name,  // La colonne language_name doit être présente maintenant
+        language_id: pl.languages_code?.language_id         
       }));
       
       useStore.getState().setParentLanguages(formattedLanguages);
-      };
+    };
 
     fetchLanguages();
   }, [user]);
 
   useEffect(() => {
     if (selectedChild) {
-      // Filtrer les langues activées
-      const activatedLanguages = parentLanguages.filter(pl => pl.id);
+      // Filtrer les langues activées à partir de parentLanguages
+      const activatedLanguages = parentLanguages.filter(pl => !!pl.language_id);
       setAvailableLanguages(activatedLanguages);
       
-      // Si une seule langue est activée, rediriger directement vers le jeu en passant **l'ID de la langue**
-      if (activatedLanguages.length === 1 && activatedLanguages[0].id) {
+      // Si une seule langue est activée, rediriger directement vers le jeu en passant l'objet SelectedLanguage
+      if (activatedLanguages.length === 1 && activatedLanguages[0].language_id) {
         useStore.getState().setCurrentChild(selectedChild);
-        useStore.getState().setCurrentLanguage(activatedLanguages[0].language_id);
+        useStore.getState().setCurrentLanguage({
+          id: activatedLanguages[0].language_id,
+          name: activatedLanguages[0].language_name || "Nom inconnu"
+        });
         navigate(`/game`);
       }
     }
@@ -97,7 +97,7 @@ export function Dashboard() {
     }
   };
 
-  const hasActivatedLanguages = parentLanguages.some(pl => pl.id);
+  const hasActivatedLanguages = parentLanguages.some(pl => !!pl.language_id);
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -154,14 +154,16 @@ export function Dashboard() {
                   <button
                     key={lang.id}
                     onClick={() => {
-                      // Mettre à jour l'enfant courant et la langue active dans le store
                       useStore.getState().setCurrentChild(selectedChild);
-                      useStore.getState().setCurrentLanguage(lang.id); // ou lang.language_id si votre structure inclut language_id
+                      useStore.getState().setCurrentLanguage({
+                        id: lang.language_id,
+                        name: lang.language_name || "Nom inconnu"
+                      });
                       navigate(`/game`);
                     }}
                     className="btn-primary w-full"
                   >
-                    {lang.language_name}
+                    {lang.language_name || "Nom inconnu"}
                   </button>
                 ))}
               </div>

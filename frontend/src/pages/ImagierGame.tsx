@@ -66,7 +66,7 @@ export function ImagierGame() {
           .select("*")
           .eq("child_id", currentChild.id)
           .eq("language_id", currentLanguage)
-          .single();
+          .maybeSingle();
         if (error) {
           console.error("Erreur lors de la récupération de la progression :", error);
         } else {
@@ -236,7 +236,7 @@ export function ImagierGame() {
               Trouve le mot correspondant à l'image
             </h1>
             <button onClick={() => navigate('/rewards')} className="text-lg btn-secondary">
-              Pièces d'or : {gameProgress ? gameProgress.score : 0}
+              Pièces d'or : {gameProgress?.score ?? 0}
             </button>
           </div>
           <button onClick={() => navigate('/imagier')} className="btn-secondary">

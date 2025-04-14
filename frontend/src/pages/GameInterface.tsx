@@ -48,8 +48,8 @@ export function GameInterface() {
         .from('game_progress')
         .select('*')
         .eq('child_id', currentChild.id)
-        .eq('language_id', currentLanguage)
-        .single();
+        .eq('language_id', currentLanguage.id)
+        .maybeSingle();
 
       if (error) {
         console.error('Erreur lors de la récupération de la progression du jeu :', error);
@@ -80,7 +80,7 @@ export function GameInterface() {
               onClick={() => navigate('/rewards')}
               className="text-lg btn-secondary"
             >
-              Pièces d'or : {gameProgress ? gameProgress.score : 0}
+              Pièces d'or : {gameProgress?.score ?? 0}
             </button>
           </div>
           <button
