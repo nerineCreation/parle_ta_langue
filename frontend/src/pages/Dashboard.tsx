@@ -62,7 +62,8 @@ export function Dashboard() {
           id: activatedLanguages[0].language_id,
           name: activatedLanguages[0].language_name || "Nom inconnu"
         });
-        navigate(`/game`);
+        //navigate(`/game`);
+        navigate(`/imagier`);
       }
     }
   }, [selectedChild, navigate, parentLanguages]);
@@ -159,7 +160,8 @@ export function Dashboard() {
                         id: lang.language_id,
                         name: lang.language_name || "Nom inconnu"
                       });
-                      navigate(`/game?id=${lang.language_id}`);
+                      //navigate(`/game`);
+                      navigate(`/imagier`);
                     }}
                     className="btn-primary w-full"
                   >

@@ -118,7 +118,7 @@ export function ImagierShow() {
               Pièces d'or : {gameProgress?.score ?? 0}
             </button>
           </div>
-          <button onClick={() => navigate('/imagier')} className="btn-secondary">
+          <button onClick={() => navigate(-1)} className="btn-secondary">
             Retour
           </button>
         </div>

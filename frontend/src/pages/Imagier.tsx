@@ -156,7 +156,7 @@ export function Imagier() {
                     }
                     
                     useStore.getState().setTheme(data.id);
-                    navigate(`/imagier-game`);
+                    navigate(`/imagier-show`);
                   } else {
                     console.warn("Aucun sous-thème disponible pour ce thème.");
                   }
