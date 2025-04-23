@@ -14,6 +14,7 @@ export function Dashboard() {
   const [selectedChild, setSelectedChild] = useState<ChildProfile | null>(null)
   const [availableLanguages, setAvailableLanguages] = useState<ParentLanguage[]>([])
   const [bubulleUrls, setBubulleUrls] = useState<Record<string, string>>({})
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -46,6 +47,19 @@ export function Dashboard() {
       useStore.getState().setParentLanguages(formattedLanguages);
     };
 
+    const loadLogo = async () => {
+      const { data, error } = supabase
+        .storage
+        .from('images')       // Nom de votre bucket
+        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
+      if (error) {
+        console.error('Erreur lors de la récupération du logo :', error)
+      } else {
+        setLogoUrl(data.publicUrl)
+      }
+    }
+    
+    loadLogo()
     fetchLanguages();
   }, [user]);
 
@@ -101,81 +115,90 @@ export function Dashboard() {
   const hasActivatedLanguages = parentLanguages.some(pl => !!pl.language_id);
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-pink">Tableau de bord</h1>
-          <div className="space-x-4">
-            <button onClick={handleLogout} className="btn-secondary">Déconnexion</button>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
+      <div className="bg-background px-4 py-2">
+        {logoUrl && (
+          <img
+            src={logoUrl}
+            alt="Parle ta langue"
+            className="h-[60px] w-auto mb-6 cursor-pointer"
+            onClick={() => navigate('/dashboard')}
+          />
+        )}
+      </div>
+
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-pink">Tableau de bord</h1>
+        <div className="space-x-4">
+          <button onClick={handleLogout} className="btn-secondary">Déconnexion</button>
+        </div>
+      </div>
+      <div className="grid gap-6">
+        <div className="card">
+          <h2 className="text-2xl font-semibold mb-4">Bienvenue, {user?.email}</h2>
+          <div className="flex gap-4">
+            <button onClick={() => navigate('/profiles')} className="btn-primary">Gérer les profils enfants</button>
+            <button onClick={() => navigate('/languages')} className="btn-primary">Gérer mes langues</button>
           </div>
         </div>
-        <div className="grid gap-6">
+        {children.length > 0 ? (
           <div className="card">
-            <h2 className="text-2xl font-semibold mb-4">Bienvenue, {user?.email}</h2>
-            <div className="flex gap-4">
-              <button onClick={() => navigate('/profiles')} className="btn-primary">Gérer les profils enfants</button>
-              <button onClick={() => navigate('/languages')} className="btn-primary">Gérer mes langues</button>
+            <h2 className="text-2xl font-semibold mb-4">Profils enfants</h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {children.map(child => (
+                <div key={child.id} className="p-4 rounded-lg bg-pastel-pink">
+                  <h3 className="font-semibold">{child.name}</h3>
+                  <p className="text-sm mb-2">Âge : {child.age_group}</p>
+                  {bubulleUrls[child.id] && (
+                    <img src={bubulleUrls[child.id]} alt={`Bubulle de ${child.name}`} className="w-16 h-16 mx-auto my-2" />
+                  )}
+                  <button
+                    onClick={() => hasActivatedLanguages && setSelectedChild(child)}
+                    className={`btn-primary w-full text-sm ${!hasActivatedLanguages ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={!hasActivatedLanguages}
+                  >
+                    {hasActivatedLanguages ? 'Accéder à mes jeux' : 'Activez une langue pour jouer'}
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
-          {children.length > 0 ? (
-            <div className="card">
-              <h2 className="text-2xl font-semibold mb-4">Profils enfants</h2>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {children.map(child => (
-                  <div key={child.id} className="p-4 rounded-lg bg-pastel-pink">
-                    <h3 className="font-semibold">{child.name}</h3>
-                    <p className="text-sm mb-2">Âge : {child.age_group}</p>
-                    {bubulleUrls[child.id] && (
-                      <img src={bubulleUrls[child.id]} alt={`Bubulle de ${child.name}`} className="w-16 h-16 mx-auto my-2" />
-                    )}
-                    <button
-                      onClick={() => hasActivatedLanguages && setSelectedChild(child)}
-                      className={`btn-primary w-full text-sm ${!hasActivatedLanguages ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      disabled={!hasActivatedLanguages}
-                    >
-                      {hasActivatedLanguages ? 'Accéder à mes jeux' : 'Activez une langue pour jouer'}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="card text-center">
-              <p className="text-lg mb-4">Vous n'avez pas encore créé de profil enfant</p>
-              <button onClick={() => navigate('/profiles')} className="btn-primary">Créer un profil</button>
-            </div>
-          )}
-        </div>
-        {selectedChild && availableLanguages.length > 1 && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg p-6 max-w-lg w-full">
-              <h2 className="text-2xl font-semibold mb-4 text-center">Choisissez une langue</h2>
-              <div className="grid gap-4 md:grid-cols-2">
-                {availableLanguages.map((lang) => (
-                  <button
-                    key={lang.id}
-                    onClick={() => {
-                      useStore.getState().setCurrentChild(selectedChild);
-                      useStore.getState().setCurrentLanguage({
-                        id: lang.language_id,
-                        name: lang.language_name || "Nom inconnu"
-                      });
-                      //navigate(`/game`);
-                      navigate(`/imagier`);
-                    }}
-                    className="btn-primary w-full"
-                  >
-                    {lang.language_name || "Nom inconnu"}
-                  </button>
-                ))}
-              </div>
-              <button onClick={() => setSelectedChild(null)} className="btn-secondary w-full mt-4">
-                Annuler
-              </button>
-            </div>
+        ) : (
+          <div className="card text-center">
+            <p className="text-lg mb-4">Vous n'avez pas encore créé de profil enfant</p>
+            <button onClick={() => navigate('/profiles')} className="btn-primary">Créer un profil</button>
           </div>
         )}
-      </motion.div>
-    </div>
+      </div>
+      {selectedChild && availableLanguages.length > 1 && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full">
+            <h2 className="text-2xl font-semibold mb-4 text-center">Choisissez une langue</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {availableLanguages.map((lang) => (
+                <button
+                  key={lang.id}
+                  onClick={() => {
+                    useStore.getState().setCurrentChild(selectedChild);
+                    useStore.getState().setCurrentLanguage({
+                      id: lang.language_id,
+                      name: lang.language_name || "Nom inconnu"
+                    });
+                    //navigate(`/game`);
+                    navigate(`/imagier`);
+                  }}
+                  className="btn-primary w-full"
+                >
+                  {lang.language_name || "Nom inconnu"}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setSelectedChild(null)} className="btn-secondary w-full mt-4">
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+    </motion.div>
   );
 }

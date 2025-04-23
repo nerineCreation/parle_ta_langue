@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { auth } from '../lib/auth'
 import Bubulle from '../components/Bubulle'
+import { supabase } from '../lib/supabase'
 
 export function Login() {
   const [email, setEmail] = useState('')
@@ -13,9 +14,26 @@ export function Login() {
   const [isResetting, setIsResetting] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+  
 
   // Récupérer le message de succès de l'inscription
   const signupMessage = location.state?.message
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadLogo = async () => {
+      const { data, error } = supabase
+        .storage
+        .from('images')       // Nom de votre bucket
+        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
+      if (error) {
+        console.error('Erreur lors de la récupération du logo :', error)
+      } else {
+        setLogoUrl(data.publicUrl)
+      }
+    }
+    loadLogo()
+  }, [])
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -70,7 +88,16 @@ export function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+      {logoUrl && (
+        <img
+          src={logoUrl}
+          alt="Parle ta langue"
+          className="h-40 w-auto mb-6 cursor-pointer"
+          onClick={() => navigate('/')}
+        />
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

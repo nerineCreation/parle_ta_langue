@@ -12,6 +12,7 @@ export function GameInterface() {
   const currentLanguage = useStore((state) => state.currentLanguage);
   const themeId = useStore((state) => state.theme);
   const gameProgress = useStore((state) => state.gameProgress);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [activities, setActivities] = useState<
     { id: string; name: string; icon: string; path?: string }[]
   >([]);
@@ -60,6 +61,19 @@ export function GameInterface() {
       }
     };
 
+    const loadLogo = async () => {
+      const { data, error } = supabase
+        .storage
+        .from('images')       // Nom de votre bucket
+        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
+      if (error) {
+        console.error('Erreur lors de la récupération du logo :', error)
+      } else {
+        setLogoUrl(data.publicUrl)
+      }
+    }
+
+    loadLogo()
     fetchActivities();
     fetchGameProgress();
   }, [currentChild, currentLanguage, location, navigate, themeId]);
@@ -67,13 +81,31 @@ export function GameInterface() {
   if (!currentChild || !currentLanguage) return null;
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl mx-auto"
-      >
-        <div className="flex justify-between items-center mb-8">
+    <div className="min-h-screen bg-background px-4 py-2">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
+      <div className="bg-background px-4 py-2">
+        {logoUrl && (
+          <img
+            src={logoUrl}
+            alt="Parle ta langue"
+            className="h-[60px] w-auto mb-6 cursor-pointer"
+            onClick={() => navigate('/dashboard')}
+          />
+        )}
+      </div>
+
+      <div className="bg-background p-8">
+        {logoUrl && (
+          <img
+            src={logoUrl}
+            alt="Parle ta langue"
+            className="h-[60px] w-auto mb-6 cursor-pointer"
+            onClick={() => navigate('/dashboard')}
+          />
+        )}
+      </div>
+
+         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-pink">Bienvenue {currentChild.name}</h1>
             <button

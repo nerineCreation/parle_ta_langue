@@ -10,7 +10,7 @@ export function ChildProfiles() {
   const [name, setName] = useState("");
   const [ageGroup, setAgeGroup] = useState<"0-3" | "4-6" | "7-11">("4-6");
   const [loading, setLoading] = useState(false);
-
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const children = useStore((state) => state.children);
   const setChildren = useStore((state) => state.setChildren);
   const user = useStore((state) => state.user);
@@ -29,6 +29,19 @@ export function ChildProfiles() {
       setChildren(data || []);
     };
 
+    const loadLogo = async () => {
+      const { data, error } = supabase
+        .storage
+        .from('images')       // Nom de votre bucket
+        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
+      if (error) {
+        console.error('Erreur lors de la récupération du logo :', error)
+      } else {
+        setLogoUrl(data.publicUrl)
+      }
+    }
+    
+    loadLogo()
     fetchChildren();
   }, [user, setChildren]);
 
@@ -106,8 +119,19 @@ export function ChildProfiles() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-background px-4 py-2">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
+      <div className="bg-background px-4 py-2">
+          {logoUrl && (
+            <img
+              src={logoUrl}
+              alt="Parle ta langue"
+              className="h-[60px] w-auto mb-6 cursor-pointer"
+              onClick={() => navigate('/dashboard')}
+            />
+          )}
+        </div>
+
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-pink">Profils enfants</h1>
           <button onClick={() => navigate("/dashboard")} className="btn-secondary">

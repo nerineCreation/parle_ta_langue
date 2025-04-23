@@ -24,6 +24,7 @@ export function ImagierGame() {
   const [showCoinAnimation, setShowCoinAnimation] = useState(false);
   const [animateImage, setAnimateImage] = useState(false);
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
   // Variantes d'animation pour les boutons
   const buttonVariants = {
@@ -75,6 +76,19 @@ export function ImagierGame() {
       }
     };
 
+    const loadLogo = async () => {
+      const { data, error } = supabase
+        .storage
+        .from('images')       // Nom de votre bucket
+        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
+      if (error) {
+        console.error('Erreur lors de la récupération du logo :', error)
+      } else {
+        setLogoUrl(data.publicUrl)
+      }
+    }
+
+    loadLogo()
     fetchGameProgress();
   }, [currentChild, currentLanguage, themeId]);
 
@@ -215,7 +229,7 @@ export function ImagierGame() {
   };  
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-background px-4 py-2">
       {showConfetti && (
         <Confetti
           numberOfPieces={400}
@@ -230,6 +244,17 @@ export function ImagierGame() {
       )}
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto text-center">
+        <div className="bg-background px-4 py-2">
+          {logoUrl && (
+            <img
+              src={logoUrl}
+              alt="Parle ta langue"
+              className="h-[60px] w-auto mb-6 cursor-pointer"
+              onClick={() => navigate('/dashboard')}
+            />
+          )}
+        </div>
+
         <div className="flex justify-between items-center mb-8">
           <div className="flex flex-col items-start">
             <h1 className="text-4xl font-bold text-pink">

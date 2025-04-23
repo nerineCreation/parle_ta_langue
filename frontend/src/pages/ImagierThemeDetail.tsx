@@ -15,6 +15,7 @@ export function ImagierThemeDetail() {
   const currentChild = useStore((state) => state.currentChild);
   const currentLanguage = useStore((state) => state.currentLanguage);
   const [themeName, setThemeName] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -83,22 +84,46 @@ export function ImagierThemeDetail() {
       }
     };
 
+    const loadLogo = async () => {
+      const { data, error } = supabase
+        .storage
+        .from('images')       // Nom de votre bucket
+        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
+      if (error) {
+        console.error('Erreur lors de la récupération du logo :', error)
+      } else {
+        setLogoUrl(data.publicUrl)
+      }
+    }
+
+    loadLogo()
     fetchThemes();
     fetchGameProgress();
   }, [themeGroup]);
 
   const handleThemeSelection = (themeId: any) => {
     useStore.getState().setTheme(themeId);
-    navigate(`/imagier-show?id:${themeId}`); // Redirige vers la page de jeu
+    navigate(`/imagier-show`); // Redirige vers la page de jeu
   };
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-background px-4 py-2">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-4xl mx-auto"
       >
+        <div className="bg-background px-4 py-2">
+          {logoUrl && (
+            <img
+              src={logoUrl}
+              alt="Parle ta langue"
+              className="h-[60px] w-auto mb-6 cursor-pointer"
+              onClick={() => navigate('/dashboard')}
+            />
+          )}
+        </div>
+
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-pink">{themeName}</h1>

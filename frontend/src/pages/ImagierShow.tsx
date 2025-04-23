@@ -10,6 +10,7 @@ export function ImagierShow() {
   const currentChild = useStore((state) => state.currentChild);
   const themeId = useStore((state) => state.theme);
   const gameProgress = useStore((state) => state.gameProgress);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [images, setImages] = useState(
     [] as {
       id: string;
@@ -82,6 +83,19 @@ export function ImagierShow() {
       }
     };
 
+    const loadLogo = async () => {
+      const { data, error } = supabase
+        .storage
+        .from('images')       // Nom de votre bucket
+        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
+      if (error) {
+        console.error('Erreur lors de la récupération du logo :', error)
+      } else {
+        setLogoUrl(data.publicUrl)
+      }
+    }
+
+    loadLogo()
     fetchGameProgress();
     fetchImages();
   }, [currentChild, currentLanguage, themeId, navigate]);
@@ -103,12 +117,23 @@ export function ImagierShow() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-background px-4 py-2">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-4xl mx-auto"
       >
+        <div className="bg-background px-4 py-2">
+          {logoUrl && (
+            <img
+              src={logoUrl}
+              alt="Parle ta langue"
+              className="h-[60px] w-auto mb-6 cursor-pointer"
+              onClick={() => navigate('/dashboard')}
+            />
+          )}
+        </div>
+
         <div className="flex justify-between items-center mb-8">
           <div className="flex flex-col items-start">
             <h1 className="text-4xl font-bold text-pink">
@@ -139,12 +164,19 @@ export function ImagierShow() {
                   onClick={() => handleReadAudio(image.audio_name)}
                   style={{ maxWidth: "200px" }}
                 >
-                  <img
-                    src={image.url}
-                    alt={image.fileName}
-                    className="rounded-lg shadow-lg mx-auto block"
+                  <div className="relative max-w-[200px] mx-auto">
+                    <img
+                      src={image.url}
+                      alt={image.fileName}
+                      className="rounded-lg shadow-lg block w-full
+                    ring-4 ring-pink ring-offset-2 ring-offset-white
+                    transition-all duration-200
+                    hover:ring-blue-700 hover:ring-offset-gray-100"
                   />
-                  <p className="mt-2 text-center font-semibold">{image.word}</p>
+                    <div className="rounded-lg absolute bottom-0 left-0 w-full bg-pink bg-opacity-50 text-sm text-center py-1">
+                      {image.word}
+                    </div>
+                  </div>
                 </motion.div>
               ))}
             </div>
