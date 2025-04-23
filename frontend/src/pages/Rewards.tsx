@@ -46,9 +46,10 @@ export function Rewards() {
         <div className="flex justify-between items-center mb-8">
           <div className="flex flex-col items-start">
             <h1 className="text-4xl font-bold text-pink mb-4">Récompenses</h1>
-            <p className="text-lg mb-4">
+{/*            <p className="text-lg mb-4">
             Vous avez accumulé {gameProgress?.score ?? 0} pièces d'or !
             </p>
+*/}
           </div>
           <button onClick={() => navigate(-1)} className="btn-secondary">
             Retour

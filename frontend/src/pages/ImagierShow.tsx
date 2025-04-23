@@ -136,12 +136,13 @@ export function ImagierShow() {
 
         <div className="flex justify-between items-center mb-8">
           <div className="flex flex-col items-start">
-            <h1 className="text-4xl font-bold text-pink">
-              Mon imagier
-            </h1>
-            <button onClick={() => navigate('/rewards')} className="text-lg btn-secondary">
+            <h1 className="text-4xl font-bold text-pink">Mon imagier</h1>
+{/*            <button onClick={() => navigate('/rewards')} 
+              className="text-lg btn-secondary"
+            >
               Pièces d'or : {gameProgress?.score ?? 0}
             </button>
+*/}
           </div>
           <button onClick={() => navigate(-1)} className="btn-secondary">
             Retour

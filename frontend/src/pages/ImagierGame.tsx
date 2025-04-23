@@ -260,9 +260,12 @@ export function ImagierGame() {
             <h1 className="text-4xl font-bold text-pink">
               Trouve le mot correspondant à l'image
             </h1>
-            <button onClick={() => navigate('/rewards')} className="text-lg btn-secondary">
+{/*            <button onClick={() => navigate('/rewards')} 
+              className="text-lg btn-secondary"
+            >
               Pièces d'or : {gameProgress?.score ?? 0}
             </button>
+*/}
           </div>
           <button onClick={() => navigate('/imagier')} className="btn-secondary">
             Retour

@@ -127,13 +127,13 @@ export function ImagierThemeDetail() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-pink">{themeName}</h1>
-            <button
-              onClick={() => navigate('/rewards')}
+{/*            <button onClick={() => navigate('/rewards')}
               className="text-lg btn-secondary"
             >
               Pièces d'or : {gameProgress?.score ?? 0}
             </button>
-          </div>
+*/}
+            </div>
           <button onClick={() => navigate('/imagier')} className="btn-secondary">
             Retour
           </button>

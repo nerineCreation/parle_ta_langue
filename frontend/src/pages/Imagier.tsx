@@ -132,12 +132,12 @@ export function Imagier() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold text-pink">Imagier</h1>
-            <button
-              onClick={() => navigate('/rewards')}
+{/*            <button onClick={() => navigate('/rewards')}
               className="text-lg btn-secondary"
             >
               Pièces d'or : {gameProgress?.score ?? 0}
             </button>
+*/}
           </div>
           <button
             onClick={() => navigate(`/dashboard`)}

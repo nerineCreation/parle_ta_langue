@@ -150,7 +150,7 @@ export function Dashboard() {
                   <h3 className="font-semibold">{child.name}</h3>
                   <p className="text-sm mb-2">Âge : {child.age_group}</p>
                   {bubulleUrls[child.id] && (
-                    <img src={bubulleUrls[child.id]} alt={`Bubulle de ${child.name}`} className="w-16 h-16 mx-auto my-2" />
+                    <img src={bubulleUrls[child.id]} alt={`Bubulle de ${child.name}`} className="w-16 h-16 mx-auto my-2 transform hover:scale-110 transition-transform duration-200" />
                   )}
                   <button
                     onClick={() => hasActivatedLanguages && setSelectedChild(child)}
