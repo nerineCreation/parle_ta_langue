@@ -4,16 +4,24 @@ import { motion } from "framer-motion";
 import { useStore } from "../store";
 import { supabase } from "../lib/supabase";
 import type { ChildProfile } from "../types";
+import { playClickSound } from '../lib/sound'
 
 export function ChildProfiles() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [ageGroup, setAgeGroup] = useState<"0-3" | "4-6" | "7-11">("4-6");
   const [loading, setLoading] = useState(false);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const children = useStore((state) => state.children);
   const setChildren = useStore((state) => state.setChildren);
   const user = useStore((state) => state.user);
+  const soundEnabled = useStore(state => state.soundEnabled)
+  const setSoundEnabled = useStore(state => state.setSoundEnabled)
+
+  const toggle = () => {
+    setSoundEnabled(!soundEnabled)
+    // jouer un petit son pour feedback si on active
+    if (!soundEnabled) playClickSound()
+  }
 
   useEffect(() => {
     const fetchChildren = async () => {
@@ -29,19 +37,6 @@ export function ChildProfiles() {
       setChildren(data || []);
     };
 
-    const loadLogo = async () => {
-      const { data, error } = supabase
-        .storage
-        .from('images')       // Nom de votre bucket
-        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
-      if (error) {
-        console.error('Erreur lors de la récupération du logo :', error)
-      } else {
-        setLogoUrl(data.publicUrl)
-      }
-    }
-    
-    loadLogo()
     fetchChildren();
   }, [user, setChildren]);
 
@@ -119,22 +114,19 @@ export function ChildProfiles() {
   };
 
   return (
-    <div className="min-h-screen bg-background px-4 py-2">
+    <div className="min-h-screen bg-background px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
-      <div className="bg-background px-4 py-2">
-          {logoUrl && (
-            <img
-              src={logoUrl}
-              alt="Parle ta langue"
-              className="h-[60px] w-auto mb-6 cursor-pointer"
-              onClick={() => navigate('/dashboard')}
-            />
-          )}
-        </div>
-
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-pink">Profils enfants</h1>
-          <button onClick={() => navigate("/dashboard")} className="btn-secondary">
+        <button
+          onClick={toggle}
+          className="text-xl p-2"
+          aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
+        >
+          {soundEnabled ? '🔊' : '🔇'}
+        </button>
+
+        <h1 className="text-4xl font-bold text-pink">Profils enfants</h1>
+          <button onClick={() => {playClickSound(); navigate("/dashboard")}} className="btn-secondary">
             Retour
           </button>
         </div>
@@ -176,7 +168,7 @@ export function ChildProfiles() {
                   </select>
                 </div>
                 <button
-                  onClick={handleAddChild}
+                  onClick={() => {playClickSound(); handleAddChild()}}
                   className="btn-primary w-full"
                   disabled={loading || !name.trim()}
                 >
@@ -205,7 +197,7 @@ export function ChildProfiles() {
                     <h3 className="font-semibold text-lg mb-2">{child.name}</h3>
                     <p className="text-sm mb-4">Âge : {child.age_group}</p>
                     <button
-                      onClick={() => handleDeleteChild(child.id)}
+                      onClick={() => {playClickSound(); handleDeleteChild(child.id)}}
                       className="btn-secondary w-full bg-red-100 text-red-600 hover:bg-red-200"
                       disabled={loading}
                     >

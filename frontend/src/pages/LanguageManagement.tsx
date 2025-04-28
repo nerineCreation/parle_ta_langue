@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useStore } from '../store';
 import type { ParentLanguage, Languages } from '../types';
+import { playClickSound } from '../lib/sound'
 
 export function LanguageManagement() {
   const navigate = useNavigate();
@@ -14,7 +15,14 @@ export function LanguageManagement() {
   const [activatedLanguages, setActivatedLanguages] = useState<ParentLanguage[]>([]);
   const user = useStore((state) => state.user);
   const [languages, setLanguages] = useState<Languages[]>([]);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const soundEnabled = useStore(state => state.soundEnabled)
+  const setSoundEnabled = useStore(state => state.setSoundEnabled)
+
+  const toggle = () => {
+    setSoundEnabled(!soundEnabled)
+    // jouer un petit son pour feedback si on active
+    if (!soundEnabled) playClickSound()
+  }
 
   useEffect(() => {
     if (!user) {
@@ -22,19 +30,6 @@ export function LanguageManagement() {
       return;
     }
 
-    const loadLogo = async () => {
-      const { data, error } = supabase
-        .storage
-        .from('images')       // Nom de votre bucket
-        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
-      if (error) {
-        console.error('Erreur lors de la récupération du logo :', error)
-      } else {
-        setLogoUrl(data.publicUrl)
-      }
-    }
-
-    loadLogo()
     loadData();
   }, [user, navigate]);
 
@@ -164,22 +159,20 @@ export function LanguageManagement() {
   
 
   return (
-    <div className="min-h-screen bg-background px-4 py-2">
+    <div className="min-h-screen bg-background px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
-        <div className="bg-background px-4 py-2">
-          {logoUrl && (
-            <img
-              src={logoUrl}
-              alt="Parle ta langue"
-              className="h-[60px] w-auto mb-6 cursor-pointer"
-              onClick={() => navigate('/dashboard')}
-            />
-          )}
-        </div>
 
         <div className="flex justify-between items-center mb-8">
+          <button
+            onClick={toggle}
+            className="text-xl p-2"
+            aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
+          >
+            {soundEnabled ? '🔊' : '🔇'}
+          </button>
+
           <h1 className="text-4xl font-bold text-pink">Gestion des langues</h1>
-          <button onClick={() => navigate('/dashboard')} className="btn-secondary">Retour</button>
+          <button onClick={() => {playClickSound(); navigate('/dashboard')}} className="btn-secondary">Retour</button>
         </div>
         <div className="grid gap-6">
           <div className="card">
@@ -221,6 +214,7 @@ export function LanguageManagement() {
                 type="submit"
                 className={`btn-primary w-full ${loading || !activationCode.trim() || activationCode.length !== 12 ? 'opacity-50 cursor-not-allowed' : ''}`}
                 disabled={loading || !activationCode.trim() || activationCode.length !== 12}
+                onClick={() => playClickSound()}
               >
                 {loading ? (
                   <span className="flex items-center justify-center">

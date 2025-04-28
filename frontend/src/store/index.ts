@@ -33,6 +33,8 @@ interface AppState {
   setThemeGroup: (themeGroup: ThemeGroup | null) => void;
   setGameProgress: (progress: Partial<GameProgress>) => void;
   logout: () => Promise<void>;
+  soundEnabled: boolean
+  setSoundEnabled: (enabled: boolean) => void
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -50,6 +52,8 @@ export const useStore = create<AppState>((set) => ({
     completed_activities: [],
     unlocked_rewards: [],
   },
+  soundEnabled: true,               // par défaut on joue les sons
+  setSoundEnabled: (enabled) => set({ soundEnabled: enabled }),
   setUser: (user) => set({ user }),
   setCurrentChild: (child) => set({ currentChild: child }),
   setChildren: (children) => set({ children }),

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useStore } from '../store';
-
+import { playClickSound } from '../lib/sound'
 
 export function ImagierThemeDetail() {
   const navigate = useNavigate();
@@ -15,7 +15,14 @@ export function ImagierThemeDetail() {
   const currentChild = useStore((state) => state.currentChild);
   const currentLanguage = useStore((state) => state.currentLanguage);
   const [themeName, setThemeName] = useState<string | null>(null);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const soundEnabled = useStore(state => state.soundEnabled)
+  const setSoundEnabled = useStore(state => state.setSoundEnabled)
+
+  const toggle = () => {
+    setSoundEnabled(!soundEnabled)
+    // jouer un petit son pour feedback si on active
+    if (!soundEnabled) playClickSound()
+  }
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -84,19 +91,6 @@ export function ImagierThemeDetail() {
       }
     };
 
-    const loadLogo = async () => {
-      const { data, error } = supabase
-        .storage
-        .from('images')       // Nom de votre bucket
-        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
-      if (error) {
-        console.error('Erreur lors de la récupération du logo :', error)
-      } else {
-        setLogoUrl(data.publicUrl)
-      }
-    }
-
-    loadLogo()
     fetchThemes();
     fetchGameProgress();
   }, [themeGroup]);
@@ -107,36 +101,31 @@ export function ImagierThemeDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-background px-4 py-2">
+    <div className="min-h-screen bg-background px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-4xl mx-auto"
       >
-        <div className="bg-background px-4 py-2">
-          {logoUrl && (
-            <img
-              src={logoUrl}
-              alt="Parle ta langue"
-              className="h-[60px] w-auto mb-6 cursor-pointer"
-              onClick={() => navigate('/dashboard')}
-            />
-          )}
-        </div>
-
         <div className="flex justify-between items-center mb-8">
+          <button
+            onClick={toggle}
+            className="text-xl p-2"
+            aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
+          >
+            {soundEnabled ? '🔊' : '🔇'}
+          </button>
+
           <div>
             <h1 className="text-4xl font-bold text-pink">{themeName}</h1>
-{/*            <button onClick={() => navigate('/rewards')}
+{/*            <button onClick={() => {playClickSound(); navigate('/rewards')}}
               className="text-lg btn-secondary"
             >
               Pièces d'or : {gameProgress?.score ?? 0}
             </button>
 */}
             </div>
-          <button onClick={() => navigate('/imagier')} className="btn-secondary">
-            Retour
-          </button>
+          <button onClick={() => {playClickSound(); navigate('/imagier')}} className="btn-secondary">Retour</button>
         </div>
 
         <div className="card mb-6">
@@ -151,7 +140,7 @@ export function ImagierThemeDetail() {
               {themes.map((theme) => (
                 <button
                   key={theme.id}
-                  onClick={() => handleThemeSelection(theme.id)}
+                  onClick={() => {playClickSound(); handleThemeSelection(theme.id)}}
                   className="btn-primary w-full flex items-center justify-center"
                 >
                   <div className="text-4xl mb-4">{theme.icon}</div>

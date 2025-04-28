@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useStore } from '../store';
+import { playClickSound } from '../lib/sound'
 
 export function Imagier() {
   const navigate = useNavigate();
@@ -13,7 +14,14 @@ export function Imagier() {
   const currentChild = useStore((state) => state.currentChild);
   const currentLanguage = useStore((state) => state.currentLanguage);
   const gameProgress = useStore((state) => state.gameProgress);
-  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const soundEnabled = useStore(state => state.soundEnabled)
+  const setSoundEnabled = useStore(state => state.setSoundEnabled)
+
+  const toggle = () => {
+    setSoundEnabled(!soundEnabled)
+    // jouer un petit son pour feedback si on active
+    if (!soundEnabled) playClickSound()
+  }
   
   useEffect(() => {
     if (!currentChild) {
@@ -96,19 +104,6 @@ export function Imagier() {
       }
     };
 
-    const loadLogo = async () => {
-      const { data, error } = supabase
-        .storage
-        .from('images')       // Nom de votre bucket
-        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
-      if (error) {
-        console.error('Erreur lors de la récupération du logo :', error)
-      } else {
-        setLogoUrl(data.publicUrl)
-      }
-    }
-
-    loadLogo()
     loadThemes();
     fetchGameProgress();
   }, [currentChild, navigate]);
@@ -116,23 +111,20 @@ export function Imagier() {
   if (!currentChild || !currentLanguage) return null;
 
   return (
-    <div className="min-h-screen bg-background px-4 py-2">
+    <div className="min-h-screen bg-background px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
-        <div className="bg-background px-4 py-2">
-          {logoUrl && (
-            <img
-              src={logoUrl}
-              alt="Parle ta langue"
-              className="h-[60px] w-auto mb-6 cursor-pointer"
-              onClick={() => navigate('/dashboard')}
-            />
-          )}
-        </div>
-
         <div className="flex justify-between items-center mb-8">
+          <button
+            onClick={toggle}
+            className="text-xl p-2"
+            aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
+          >
+            {soundEnabled ? '🔊' : '🔇'}
+          </button>
+          
           <div>
             <h1 className="text-4xl font-bold text-pink">Imagier</h1>
-{/*            <button onClick={() => navigate('/rewards')}
+{/*            <button onClick={() => {playClickSound(); navigate('/rewards')}}
               className="text-lg btn-secondary"
             >
               Pièces d'or : {gameProgress?.score ?? 0}
@@ -140,7 +132,7 @@ export function Imagier() {
 */}
           </div>
           <button
-            onClick={() => navigate(`/dashboard`)}
+            onClick={() => {playClickSound(); navigate(`/dashboard`)}}
             className="btn-secondary"
           >
             Retour
@@ -186,7 +178,7 @@ export function Imagier() {
                 return (
                   <button
                     key={theme.id}
-                    onClick={handleNavigation}
+                    onClick={() => {playClickSound(); handleNavigation()}}
                     className="btn-primary w-full flex items-center justify-center"
                   >
                     <div className="text-4xl mb-4">{theme.icon}</div>

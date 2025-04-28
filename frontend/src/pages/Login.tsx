@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { auth } from '../lib/auth'
 import Bubulle from '../components/Bubulle'
 import { supabase } from '../lib/supabase'
+import { playClickSound } from '../lib/sound'
 
 export function Login() {
   const [email, setEmail] = useState('')
@@ -14,26 +15,35 @@ export function Login() {
   const [isResetting, setIsResetting] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-  
-
-  // Récupérer le message de succès de l'inscription
   const signupMessage = location.state?.message
-  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const soundEnabled = useStore(state => state.soundEnabled)
+  const setSoundEnabled = useStore(state => state.setSoundEnabled)
+
+  const toggle = () => {
+    setSoundEnabled(!soundEnabled)
+    // jouer un petit son pour feedback si on active
+    if (!soundEnabled) playClickSound()
+  }
+
+  // **Musique d'ambiance**
+  const [bgmUrl, setBgmUrl] = useState<string | null>(null)
 
   useEffect(() => {
-    const loadLogo = async () => {
+    // Charger l’URL publique du fichier audio d’ambiance
+    const loadBgm = async () => {
       const { data, error } = supabase
         .storage
-        .from('images')       // Nom de votre bucket
-        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
+        .from('audios')          // nom du bucket
+        .getPublicUrl('accueil entier VF.wav') // nom du fichier fourni
       if (error) {
-        console.error('Erreur lors de la récupération du logo :', error)
+        console.error('Erreur chargement musique d’ambiance :', error)
       } else {
-        setLogoUrl(data.publicUrl)
+        setBgmUrl(data.publicUrl)
       }
     }
-    loadLogo()
+    loadBgm()
   }, [])
+
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -89,12 +99,13 @@ export function Login() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-      {logoUrl && (
-        <img
-          src={logoUrl}
-          alt="Parle ta langue"
-          className="h-40 w-auto mb-6 cursor-pointer"
-          onClick={() => navigate('/')}
+      {/* audio caché démarré muet */}
+      {bgmUrl && (
+        <audio
+          src={bgmUrl}
+          autoPlay
+          loop
+          className="hidden"
         />
       )}
 
@@ -107,6 +118,14 @@ export function Login() {
           <div className="relative">
             <Bubulle className="mx-auto transform hover:scale-110 transition-transform duration-200" />
           </div>
+          <button
+            onClick={toggle}
+            className="text-xl p-2"
+            aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
+          >
+            {soundEnabled ? '🔊' : '🔇'}
+          </button>
+
           <h1 className="mt-6 text-3xl font-bold text-black">
             {isResetting ? 'Réinitialiser le mot de passe' : 'Bon retour parmi nous !'}
           </h1>

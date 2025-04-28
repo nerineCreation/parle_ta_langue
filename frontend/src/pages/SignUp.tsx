@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { auth } from '../lib/auth'
 import Bubulle from '../components/Bubulle'
+import { supabase } from '../lib/supabase'
+import { playClickSound } from '../lib/sound'
 
 interface PasswordValidation {
   minLength: boolean
@@ -26,7 +28,34 @@ export function SignUp() {
     hasSpecialChar: false
   })
   const navigate = useNavigate()
+  const soundEnabled = useStore(state => state.soundEnabled)
+  const setSoundEnabled = useStore(state => state.setSoundEnabled)
 
+  const toggle = () => {
+    setSoundEnabled(!soundEnabled)
+    // jouer un petit son pour feedback si on active
+    if (!soundEnabled) playClickSound()
+  }
+
+  // **Musique d'ambiance**
+  const [bgmUrl, setBgmUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Charger l’URL publique du fichier audio d’ambiance
+    const loadBgm = async () => {
+      const { data, error } = supabase
+        .storage
+        .from('audios')          // nom du bucket
+        .getPublicUrl('accueil entier VF.wav') // nom du fichier fourni
+      if (error) {
+        console.error('Erreur chargement musique d’ambiance :', error)
+      } else {
+        setBgmUrl(data.publicUrl)
+      }
+    }
+    loadBgm()
+  }, [])
+  
   useEffect(() => {
     validatePassword(password)
   }, [password])
@@ -86,6 +115,15 @@ export function SignUp() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      {/* audio caché démarré muet */}
+      {bgmUrl && (
+        <audio
+          src={bgmUrl}
+          autoPlay
+          loop
+          className="hidden"
+        />
+      )}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -95,6 +133,14 @@ export function SignUp() {
           <div className="relative">
             <Bubulle className="mx-auto transform hover:scale-110 transition-transform duration-200" />
           </div>
+          <button
+            onClick={toggle}
+            className="text-xl p-2"
+            aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
+          >
+            {soundEnabled ? '🔊' : '🔇'}
+          </button>
+
           <h1 className="mt-6 text-3xl font-bold text-black">
             Rejoignez l'aventure !
           </h1>

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useStore } from '../store'
 import { supabase } from '../lib/supabase'
 import Bubulle from '../components/Bubulle'
+import { playClickSound } from '../lib/sound'
 
 interface Language {
   id: string
@@ -20,7 +21,14 @@ export default function LanguageUnlock() {
   const navigate = useNavigate()
   const currentChild = useStore((state) => state.currentChild)
   const user = useStore((state) => state.user)
-  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const soundEnabled = useStore(state => state.soundEnabled)
+  const setSoundEnabled = useStore(state => state.setSoundEnabled)
+
+  const toggle = () => {
+    setSoundEnabled(!soundEnabled)
+    // jouer un petit son pour feedback si on active
+    if (!soundEnabled) playClickSound()
+  }
 
   useEffect(() => {
     if (!currentChild) {
@@ -39,19 +47,7 @@ export default function LanguageUnlock() {
         setLanguages(data)
       }
     }
-    const loadLogo = async () => {
-      const { data, error } = supabase
-        .storage
-        .from('images')       // Nom de votre bucket
-        .getPublicUrl('Logo.png')  // Chemin relatif dans le bucket
-      if (error) {
-        console.error('Erreur lors de la récupération du logo :', error)
-      } else {
-        setLogoUrl(data.publicUrl)
-      }
-    }
 
-    loadLogo()
     loadLanguages()
   }, [currentChild, navigate])
 
@@ -94,29 +90,21 @@ export default function LanguageUnlock() {
   }
 
   return (
-    <div className="min-h-screen bg-background px-4 py-2">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md mx-auto"
-      >
-        <div className="bg-background px-4 py-2">
-          {logoUrl && (
-            <img
-              src={logoUrl}
-              alt="Parle ta langue"
-              className="h-[60px] w-auto mb-6 cursor-pointer"
-              onClick={() => navigate('/dashboard')}
-            />
-          )}
-        </div>
+    <div className="min-h-screen bg-background px-4 py-8">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto">
 
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-pink">
-            Débloquer une langue
-          </h1>
           <button
-            onClick={() => navigate('/game')}
+            onClick={toggle}
+            className="text-xl p-2"
+            aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
+          >
+            {soundEnabled ? '🔊' : '🔇'}
+          </button>
+
+          <h1 className="text-4xl font-bold text-pink">Débloquer une langue</h1>
+          <button
+            onClick={() => {playClickSound(); navigate('/game')}}
             className="btn-secondary"
           >
             Retour
@@ -158,6 +146,7 @@ export default function LanguageUnlock() {
               type="submit"
               disabled={isLoading}
               className="btn-primary w-full"
+              onClick={() => {playClickSound()}}
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">
