@@ -5,6 +5,7 @@ import { auth } from '../lib/auth'
 import Bubulle from '../components/Bubulle'
 import { supabase } from '../lib/supabase'
 import { playClickSound } from '../lib/sound'
+import { useStore } from '../store'
 
 export function Login() {
   const [email, setEmail] = useState('')
