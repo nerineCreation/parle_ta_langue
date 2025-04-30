@@ -112,14 +112,14 @@ export function Dashboard() {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-8 py-8">
-        <button
+{/*        <button
           onClick={toggle}
           className="text-xl p-2"
           aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
         >
           {soundEnabled ? '🔊' : '🔇'}
         </button>
-
+*/}
         <h1 className="text-4xl font-bold text-pink">Tableau de bord</h1>
         <div className="space-x-4">
           <button onClick={() => {playClickSound(); handleLogout}} className="btn-secondary">Déconnexion</button>

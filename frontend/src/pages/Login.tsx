@@ -119,14 +119,14 @@ export function Login() {
           <div className="relative">
             <Bubulle className="mx-auto transform hover:scale-110 transition-transform duration-200" />
           </div>
-          <button
+{/*          <button
             onClick={toggle}
             className="text-xl p-2"
             aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
           >
             {soundEnabled ? '🔊' : '🔇'}
           </button>
-
+*/}
           <h1 className="mt-6 text-3xl font-bold text-black">
             {isResetting ? 'Réinitialiser le mot de passe' : 'Bon retour parmi nous !'}
           </h1>

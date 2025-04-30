@@ -79,14 +79,14 @@ export function GameInterface() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
          <div className="flex justify-between items-center mb-8">
           <div>
-            <button
+{/*            <button
               onClick={toggle}
               className="text-xl p-2"
               aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
             >
               {soundEnabled ? '🔊' : '🔇'}
             </button>
-
+*/}
             <h1 className="text-4xl font-bold text-pink">Bienvenue {currentChild.name}</h1>
 {/*            <button onClick={() => {playClickSound(); navigate('/rewards')}}
               className="text-lg btn-secondary"

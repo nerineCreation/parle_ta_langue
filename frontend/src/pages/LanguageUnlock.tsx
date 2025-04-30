@@ -94,14 +94,14 @@ export default function LanguageUnlock() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto">
 
         <div className="flex justify-between items-center mb-8">
-          <button
+{/*          <button
             onClick={toggle}
             className="text-xl p-2"
             aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
           >
             {soundEnabled ? '🔊' : '🔇'}
           </button>
-
+*/}
           <h1 className="text-4xl font-bold text-pink">Débloquer une langue</h1>
           <button
             onClick={() => {playClickSound(); navigate('/game')}}

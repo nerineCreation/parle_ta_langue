@@ -241,14 +241,14 @@ export function ImagierGame() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto text-center">
          <div className="flex justify-between items-center mb-8">
           <div className="flex flex-col items-start">
-            <button
+{/*            <button
               onClick={toggle}
               className="text-xl p-2"
               aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
             >
               {soundEnabled ? '🔊' : '🔇'}
             </button>
-
+*/}
             <h1 className="text-4xl font-bold text-pink">Trouve le mot correspondant à l'image</h1>
 {/*            <button onClick={() => {playClickSound(); navigate('/rewards')}} 
               className="text-lg btn-secondary"

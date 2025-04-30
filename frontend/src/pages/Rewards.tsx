@@ -25,14 +25,14 @@ export function Rewards() {
 
         <div className="flex justify-between items-center mb-8">
           <div className="flex flex-col items-start">
-            <button
+{/*            <button
               onClick={toggle}
               className="text-xl p-2"
               aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
             >
               {soundEnabled ? '🔊' : '🔇'}
             </button>
-
+*/}
             <h1 className="text-4xl font-bold text-pink mb-4">Récompenses</h1>
 {/*            <p className="text-lg mb-4">
             Vous avez accumulé {gameProgress?.score ?? 0} pièces d'or !
