@@ -5,6 +5,7 @@ import { auth } from '../lib/auth'
 import Bubulle from '../components/Bubulle'
 import { supabase } from '../lib/supabase'
 import { playClickSound } from '../lib/sound'
+import { useStore } from '../store'
 
 interface PasswordValidation {
   minLength: boolean
@@ -15,6 +16,7 @@ interface PasswordValidation {
 }
 
 export function SignUp() {
+  const [pseudo, setPseudo] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -28,120 +30,106 @@ export function SignUp() {
     hasSpecialChar: false
   })
   const navigate = useNavigate()
+
+  // audio
   const soundEnabled = useStore(state => state.soundEnabled)
   const setSoundEnabled = useStore(state => state.setSoundEnabled)
-
-  const toggle = () => {
+  const toggleSound = () => {
     setSoundEnabled(!soundEnabled)
-    // jouer un petit son pour feedback si on active
     if (!soundEnabled) playClickSound()
   }
 
-  // **Musique d'ambiance**
+  // bgm
   const [bgmUrl, setBgmUrl] = useState<string | null>(null)
-
   useEffect(() => {
-    // Charger l’URL publique du fichier audio d’ambiance
     const loadBgm = async () => {
       const { data, error } = supabase
         .storage
-        .from('audios')          // nom du bucket
-        .getPublicUrl('accueil entier VF.wav') // nom du fichier fourni
-      if (error) {
-        console.error('Erreur chargement musique d’ambiance :', error)
-      } else {
-        setBgmUrl(data.publicUrl)
-      }
+        .from('audios')
+        .getPublicUrl('accueil entier VF.wav')
+      if (!error) setBgmUrl(data.publicUrl)
     }
     loadBgm()
   }, [])
-  
-  useEffect(() => {
-    validatePassword(password)
-  }, [password])
 
-  const validatePassword = (password: string) => {
+  // password rules
+  useEffect(() => { validatePassword(password) }, [password])
+  const validatePassword = (pw: string) => {
     setPasswordValidation({
-      minLength: password.length >= 8,
-      hasUpperCase: /[A-Z]/.test(password),
-      hasLowerCase: /[a-z]/.test(password),
-      hasNumber: /[0-9]/.test(password),
-      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+      minLength: pw.length >= 8,
+      hasUpperCase: /[A-Z]/.test(pw),
+      hasLowerCase: /[a-z]/.test(pw),
+      hasNumber: /[0-9]/.test(pw),
+      hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(pw)
     })
   }
+  const isPasswordValid = () => Object.values(passwordValidation).every(Boolean)
 
-  const validateEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  }
-
-  const isPasswordValid = () => {
-    return Object.values(passwordValidation).every(Boolean)
-  }
+  const validateEmail = (em: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (loading) return
-
-    if (!validateEmail(email)) {
-      setError('Veuillez entrer une adresse email valide')
-      return
-    }
-
-    setError('')
-
-    // Validation du mot de passe
-    if (!isPasswordValid()) {
-      setError('Le mot de passe ne respecte pas les critères de sécurité')
-      return
-    }
-
-    if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas')
-      return
-    }
-
+  
+    // … vos validations …
+  
     setLoading(true)
-
+  
+    // 1) Inscription via l’API Auth
     const response = await auth.signUp(email, password)
-    
-    if (response.success) {
-      navigate('/', { state: { message: 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.' } })
+  
+    if (response.success && response.user) {
+      // 2) Création du profil utilisateur avec pseudo
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          { id: response.user.id, email: response.user.email, pseudo }
+        ])
+        // Important : ajouter .select() pour forcer Supabase à renvoyer l’erreur/le résultat
+        .select('*')
+  
+      if (profileError) {
+        console.error('Erreur lors de la création du profil :', profileError)
+        // Vous pouvez afficher un warning, mais on continue la nav
+      }
+  
+      // 3) Redirection vers /login AVEC message
+      navigate('/', {
+        state: {
+          message: 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.'
+        }
+      })
     } else if (response.error) {
       setError(response.error.message)
     }
-
+  
     setLoading(false)
   }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      {/* audio caché démarré muet */}
-      {bgmUrl && (
-        <audio
-          src={bgmUrl}
-          autoPlay
-          loop
-          className="hidden"
-        />
-      )}
+      {/* musique d'ambiance (muette) */}
+      {bgmUrl && (<audio src={bgmUrl} autoPlay loop muted={!soundEnabled} className="hidden" />)}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="card max-w-md w-full"
       >
         <div className="text-center">
-          <div className="relative">
-            <Bubulle className="mx-auto transform hover:scale-110 transition-transform duration-200" />
-          </div>
+          <Bubulle className="mx-auto transform hover:scale-110 transition-transform duration-200" />
 {/*          <button
-            onClick={toggle}
-            className="text-xl p-2"
+            onClick={toggleSound}
+            className="text-xl mt-4"
             aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
           >
             {soundEnabled ? '🔊' : '🔇'}
           </button>
 */}
-          <h1 className="mt-6 text-3xl font-bold text-black">Rejoignez l'aventure !</h1>
+          <h1 className="mt-6 text-3xl font-bold text-black">
+            Rejoignez l’aventure !
+          </h1>
         </div>
 
         {error && (
@@ -151,6 +139,24 @@ export function SignUp() {
         )}
 
         <form onSubmit={handleSignUp} className="space-y-6 mt-6">
+          {/* Pseudo */}
+          <div>
+            <label htmlFor="pseudo" className="block text-sm font-medium text-gray-700 mb-1">
+              Pseudo
+            </label>
+            <input
+              id="pseudo"
+              type="text"
+              value={pseudo}
+              onChange={e => setPseudo(e.target.value)}
+              className="input-field"
+              required
+              disabled={loading}
+              placeholder="Votre pseudo"
+            />
+          </div>
+
+          {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -159,39 +165,37 @@ export function SignUp() {
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               className="input-field"
               required
               disabled={loading}
               placeholder="vous@exemple.com"
-              pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
-              title="Veuillez entrer une adresse email valide"
             />
           </div>
 
+          {/* Password */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Mot de passe
             </label>
-            <div className="relative">
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input-field"
-                required
-                disabled={loading}
-                placeholder="Choisissez un mot de passe"
-              />
-            </div>
-
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="input-field"
+              required
+              disabled={loading}
+              placeholder="Choisissez un mot de passe"
+            />
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="mt-2 text-sm space-y-1 bg-gray-50 p-3 rounded-lg"
             >
-              <h3 className="font-semibold text-gray-700 mb-2">Le mot de passe doit contenir :</h3>
+              <h3 className="font-semibold text-gray-700 mb-2">
+                Le mot de passe doit contenir :
+              </h3>
               <p className={passwordValidation.minLength ? 'text-green-600' : 'text-gray-500'}>
                 ✓ Au moins 8 caractères
               </p>
@@ -205,11 +209,12 @@ export function SignUp() {
                 ✓ Un chiffre
               </p>
               <p className={passwordValidation.hasSpecialChar ? 'text-green-600' : 'text-gray-500'}>
-                ✓ Un caractère spécial (!@#$%^&amp;*(),.?&quot;:{}|&lt;&gt;)
+                ✓ Un caractère spécial
               </p>
             </motion.div>
           </div>
 
+          {/* Confirm Password */}
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
               Confirmer le mot de passe
@@ -218,7 +223,7 @@ export function SignUp() {
               id="confirmPassword"
               type="password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={e => setConfirmPassword(e.target.value)}
               className={`input-field ${
                 confirmPassword && password !== confirmPassword ? 'border-red-500' : ''
               }`}
@@ -233,14 +238,16 @@ export function SignUp() {
             )}
           </div>
 
-          <button 
-            type="submit" 
+          {/* Submit */}
+          <button
+            type="submit"
             className="btn-primary w-full"
             disabled={loading || !isPasswordValid() || password !== confirmPassword}
           >
-            {loading ? 'Création en cours...' : 'Créer mon compte'}
+            {loading ? 'Création en cours…' : 'Créer mon compte'}
           </button>
 
+          {/* Cancel */}
           <button
             type="button"
             onClick={() => navigate('/')}

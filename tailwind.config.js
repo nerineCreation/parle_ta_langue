@@ -9,6 +9,7 @@ export default {
         'pastel-pink': '#f6eaea',
         pink: '#f4a6aa',
         blue: '#c4fdfb',
+        'special-pattern': "url('/frontend/src/img/new_background.png')",
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

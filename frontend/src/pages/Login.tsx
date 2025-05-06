@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { auth } from '../lib/auth'
@@ -19,11 +19,13 @@ export function Login() {
   const signupMessage = location.state?.message
   const soundEnabled = useStore(state => state.soundEnabled)
   const setSoundEnabled = useStore(state => state.setSoundEnabled)
+  const audioRef = useRef<HTMLAudioElement>(null)
 
   const toggle = () => {
     setSoundEnabled(!soundEnabled)
     // jouer un petit son pour feedback si on active
     if (!soundEnabled) playClickSound()
+    if (audioRef.current) audioRef.current.muted = soundEnabled
   }
 
   // **Musique d'ambiance**
@@ -42,8 +44,27 @@ export function Login() {
         setBgmUrl(data.publicUrl)
       }
     }
+
     loadBgm()
-  }, [])
+
+    // Fonction qui lance la lecture et remet le mute en accord avec soundEnabled
+    const unlockAudio = () => {
+      if (!audioRef.current) return
+      audioRef.current.play().catch(() => {})
+      audioRef.current.muted = !soundEnabled
+      window.removeEventListener('touchstart', unlockAudio)
+      window.removeEventListener('click', unlockAudio)
+    }
+
+    // On débloque au premier touchstart (mobile) ou click (desktop)
+    window.addEventListener('touchstart', unlockAudio, { once: true })
+    window.addEventListener('click', unlockAudio, { once: true })
+
+    return () => {
+      window.removeEventListener('touchstart', unlockAudio)
+      window.removeEventListener('click', unlockAudio)
+    }
+  }, [soundEnabled])
 
 
   const validateEmail = (email: string) => {
@@ -103,9 +124,12 @@ export function Login() {
       {/* audio caché démarré muet */}
       {bgmUrl && (
         <audio
+          ref={audioRef}
           src={bgmUrl}
           autoPlay
           loop
+          playsInline                 // iOS inline play
+          muted={!soundEnabled}      // muet si soundEnabled=false
           className="hidden"
         />
       )}

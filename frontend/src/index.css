@@ -35,4 +35,16 @@ body {
     @apply w-full px-4 py-2 rounded-lg border-2 border-pastel-pink focus:border-pink 
            focus:outline-none transition-colors duration-200;
   }
+
+  .bg-special-pattern {
+    background-image: url('/frontend/src/img/new_background.png');
+    background-size: cover;
+    background-position: center;
+  }
+
+  .notranslate {
+    /* pour Google et consorts */
+    unicode-bidi: isolate !important;
+    direction: ltr !important;
+  }
 }

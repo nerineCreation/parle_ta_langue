@@ -22,7 +22,20 @@ export function Imagier() {
     // jouer un petit son pour feedback si on active
     if (!soundEnabled) playClickSound()
   }
-  
+
+  // bgm
+  const [bgmUrl, setBgmUrl] = useState<string | null>(null)
+  useEffect(() => {
+    const loadBgm = async () => {
+      const { data, error } = supabase
+        .storage
+        .from('audios')
+        .getPublicUrl('accueil entier VF.wav')
+      if (!error) setBgmUrl(data.publicUrl)
+    }
+    loadBgm()
+  }, [])
+
   useEffect(() => {
     if (!currentChild) {
       navigate('/profiles');
@@ -114,6 +127,8 @@ export function Imagier() {
     <div className="min-h-screen bg-background px-4 py-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
+          {bgmUrl && (<audio src={bgmUrl} autoPlay loop muted={!soundEnabled} className="hidden" />)}
+
 {/*          <button
             onClick={toggle}
             className="text-xl p-2"

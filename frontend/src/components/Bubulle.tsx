@@ -7,7 +7,7 @@ interface BubulleProps {
   className?: string;
 }
 
-export default function Bubulle({ age = '4-6', className = '' }: BubulleProps) {
+export default function Bubulle({ age = '', className = '' }: BubulleProps) {
   const [isAnimating, setIsAnimating] = useState(true);
   const [bubulleImage, setBubulleImage] = useState<string | null>(null);
   const [error, setError] = useState(false);
@@ -24,7 +24,14 @@ export default function Bubulle({ age = '4-6', className = '' }: BubulleProps) {
     const fetchBubulleImage = async () => {
       try {
         // Définition du nom du fichier selon la tranche d'âge
-        const fileName = `Bubulle_${age}.png`;
+        var fileName;
+
+        if (age == ''){
+          fileName = 'Bubulle.png';
+        }
+        else {
+          fileName = `Bubulle_${age}.png`;
+        }
 
         // Vérification de l'existence du fichier dans le stockage Supabase
         const { data, error } = supabase.storage.from('images').getPublicUrl(fileName);

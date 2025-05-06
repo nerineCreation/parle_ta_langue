@@ -24,6 +24,19 @@ export function Dashboard() {
     if (!soundEnabled) playClickSound()
   }
 
+  // bgm
+  const [bgmUrl, setBgmUrl] = useState<string | null>(null)
+  useEffect(() => {
+    const loadBgm = async () => {
+      const { data, error } = supabase
+        .storage
+        .from('audios')
+        .getPublicUrl('accueil entier VF.wav')
+      if (!error) setBgmUrl(data.publicUrl)
+    }
+    loadBgm()
+  }, [])
+
   useEffect(() => {
     if (!user) return
 
@@ -110,8 +123,11 @@ export function Dashboard() {
   const hasActivatedLanguages = parentLanguages.some(pl => !!pl.language_id);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto bg-special-pattern min-h-[900px]">
       <div className="flex justify-between items-center mb-8 py-8">
+        {/* musique d'ambiance (muette) */}
+        {bgmUrl && (<audio src={bgmUrl} autoPlay loop muted={!soundEnabled} className="hidden" />)}
+
 {/*        <button
           onClick={toggle}
           className="text-xl p-2"
@@ -122,7 +138,7 @@ export function Dashboard() {
 */}
         <h1 className="text-4xl font-bold text-pink">Tableau de bord</h1>
         <div className="space-x-4">
-          <button onClick={() => {playClickSound(); handleLogout}} className="btn-secondary">Déconnexion</button>
+          <button onClick={() => {playClickSound(); handleLogout()}} className="btn-secondary">Déconnexion</button>
         </div>
       </div>
       <div className="grid gap-6">
@@ -139,8 +155,8 @@ export function Dashboard() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {children.map(child => (
                 <div key={child.id} className="p-4 rounded-lg bg-pastel-pink">
-                  <h3 className="font-semibold">{child.name}</h3>
-                  <p className="text-sm mb-2">Âge : {child.age_group}</p>
+                  <h3 className="font-semibold text-center">{child.name}</h3>
+{/*                  <p className="text-sm mb-2 text-center">Âge : {*/}{/*child.age_group}</p>*/}
                   {bubulleUrls[child.id] && (
                     <img src={bubulleUrls[child.id]} alt={`Bubulle de ${child.name}`} className="w-16 h-16 mx-auto my-2 transform hover:scale-110 transition-transform duration-200" />
                   )}
