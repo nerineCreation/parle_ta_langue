@@ -1,6 +1,7 @@
 export interface User {
   id: string;
   email: string;
+  pseudo:string;
   created_at: string;
 }
 

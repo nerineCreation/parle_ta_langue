@@ -143,7 +143,7 @@ export function Dashboard() {
       </div>
       <div className="grid gap-6">
         <div className="card">
-          <h2 className="text-2xl font-semibold mb-4">Bienvenue, {user?.email}</h2>
+          <h2 className="text-2xl font-semibold mb-4">Bienvenue {user?.pseudo},</h2>
           <div className="flex gap-4">
             <button onClick={() => {playClickSound(); navigate('/profiles')}} className="btn-primary">Gérer les profils enfants</button>
             <button onClick={() => {playClickSound(); navigate('/languages')}} className="btn-primary">Gérer mes langues</button>

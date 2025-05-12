@@ -72,37 +72,67 @@ export function SignUp() {
     e.preventDefault()
     if (loading) return
   
-    // … vos validations …
+    if (!validateEmail(email)) {
+      setError('Veuillez entrer une adresse email valide')
+      return
+    }
+
+    setError('')
+
+    // Validation du mot de passe
+    if (!isPasswordValid()) {
+      setError('Le mot de passe ne respecte pas les critères de sécurité')
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas')
+      return
+    }
   
     setLoading(true)
   
-    // 1) Inscription via l’API Auth
-    const response = await auth.signUp(email, password)
-  
-    if (response.success && response.user) {
-      // 2) Création du profil utilisateur avec pseudo
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          { id: response.user.id, email: response.user.email, pseudo }
-        ])
-        // Important : ajouter .select() pour forcer Supabase à renvoyer l’erreur/le résultat
-        .select('*')
-  
-      if (profileError) {
-        console.error('Erreur lors de la création du profil :', profileError)
-        // Vous pouvez afficher un warning, mais on continue la nav
-      }
-  
-      // 3) Redirection vers /login AVEC message
-      navigate('/', {
-        state: {
-          message: 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.'
-        }
-      })
-    } else if (response.error) {
-      setError(response.error.message)
+
+    // 1) Inscription via l’API Auth (supabase)
+    const { error: signUpError } = await supabase.auth.signUp({ email, password })
+    if (signUpError) {
+      setError(signUpError.message)
+      setLoading(false)
+      return
     }
+
+    // 2) Récupérer l’utilisateur connecté (venant tout juste d’être créé)
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+    if (userError || !user) {
+      console.error("Impossible de récupérer l'utilisateur :", userError)
+      setLoading(false)
+      return
+    }
+
+    // 3) Inscrire le pseudo dans la table profiles
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .insert([
+        {
+          id: user.id,
+          email,
+          pseudo,
+        },
+      ])
+    if (profileError) {
+      console.error("Erreur lors de la création du profil :", profileError)
+      // Vous pouvez afficher un message mais ne pas bloquer la suite
+    }
+
+    // 4) Redirection vers la page de connexion avec message
+    navigate("/", {
+      state: {
+        message: "Compte créé avec succès ! Vous pouvez maintenant vous connecter.",
+      },
+    })
   
     setLoading(false)
   }
@@ -127,9 +157,7 @@ export function SignUp() {
             {soundEnabled ? '🔊' : '🔇'}
           </button>
 */}
-          <h1 className="mt-6 text-3xl font-bold text-black">
-            Rejoignez l’aventure !
-          </h1>
+          <h1 className="mt-6 text-3xl font-bold text-black">Rejoignez l’aventure !</h1>
         </div>
 
         {error && (
@@ -175,9 +203,7 @@ export function SignUp() {
 
           {/* Password */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Mot de passe
-            </label>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
             <input
               id="password"
               type="password"
@@ -193,9 +219,7 @@ export function SignUp() {
               animate={{ opacity: 1, y: 0 }}
               className="mt-2 text-sm space-y-1 bg-gray-50 p-3 rounded-lg"
             >
-              <h3 className="font-semibold text-gray-700 mb-2">
-                Le mot de passe doit contenir :
-              </h3>
+              <h3 className="font-semibold text-gray-700 mb-2">Le mot de passe doit contenir :</h3>
               <p className={passwordValidation.minLength ? 'text-green-600' : 'text-gray-500'}>
                 ✓ Au moins 8 caractères
               </p>
@@ -216,9 +240,7 @@ export function SignUp() {
 
           {/* Confirm Password */}
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              Confirmer le mot de passe
-            </label>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
             <input
               id="confirmPassword"
               type="password"

@@ -78,6 +78,7 @@ export const auth = {
         user: {
           id: user.id,
           email: user.email!,
+          pseudo: profile.pseudo!,
           created_at: user.created_at,
         },
         children: childProfiles || [],
