@@ -128,7 +128,7 @@ export function ChildProfiles() {
 
   return (
     <div className="min-h-screen bg-background px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto bg-special-pattern min-h-[860px]">
         <div className="flex justify-between items-center mb-8">
         {bgmUrl && (<audio src={bgmUrl} autoPlay loop muted={!soundEnabled} className="hidden" />)}
 

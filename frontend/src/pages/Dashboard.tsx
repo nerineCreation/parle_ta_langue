@@ -123,7 +123,7 @@ export function Dashboard() {
   const hasActivatedLanguages = parentLanguages.some(pl => !!pl.language_id);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto bg-special-pattern min-h-[900px]">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto bg-special-pattern min-h-[910px]">
       <div className="flex justify-between items-center mb-8 py-8">
         {/* musique d'ambiance (muette) */}
         {bgmUrl && (<audio src={bgmUrl} autoPlay loop muted={!soundEnabled} className="hidden" />)}
