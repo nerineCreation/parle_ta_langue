@@ -43,7 +43,7 @@ export function ImagierShow() {
     const fetchImages = async () => {
       setLoading(true);
       const { data, error } = await supabase
-        .from("imagier")
+        .from("images")
         .select("id, file_name, translate, audio_name")
         .eq("language_id", currentLanguage.id)
         .eq("theme_id", themeId)

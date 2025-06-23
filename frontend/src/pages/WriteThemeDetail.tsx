@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useStore } from '../store';
 import { playClickSound } from '../lib/sound'
 
-export function ImagierThemeDetail() {
+export function WriteThemeDetail() {
   const navigate = useNavigate();
   const themeGroup = useStore((state) => state.themeGroup);
   const [themes, setThemes] = useState<any[]>([]);
@@ -110,7 +110,7 @@ export function ImagierThemeDetail() {
 
   const handleThemeSelection = (themeId: any) => {
     useStore.getState().setTheme(themeId);
-    navigate(`/imagier-show`); // Redirige vers la page de jeu
+    navigate(`/write-game`); // Redirige vers la page de jeu
   };
 
   return (
@@ -128,7 +128,7 @@ export function ImagierThemeDetail() {
           </button>
 */}
           <div>
-            <h1 className="text-4xl font-bold text-pink">Imagier - {themeName}</h1>
+            <h1 className="text-4xl font-bold text-pink">Ecriture - {themeName}</h1>
 {/*            <button onClick={() => {playClickSound(); navigate('/rewards')}}
               className="text-lg btn-secondary"
             >
@@ -136,7 +136,7 @@ export function ImagierThemeDetail() {
             </button>
 */}
             </div>
-          <button onClick={() => {playClickSound(); navigate('/imagier')}} className="btn-secondary">Retour</button>
+          <button onClick={() => {playClickSound(); navigate('/write')}} className="btn-secondary">Retour</button>
         </div>
 
         <div className="card mb-6">

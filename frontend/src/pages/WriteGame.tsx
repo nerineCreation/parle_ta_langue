@@ -6,7 +6,7 @@ import { supabase } from "../lib/supabase";
 import Confetti from "react-confetti";
 import { playClickSound } from '../lib/sound'
 
-export function ImagierGame() {
+export function WriteGame() {
   const navigate = useNavigate();
   const currentLanguage = useStore((state) => state.currentLanguage);
   const currentChild = useStore((state) => state.currentChild);
@@ -249,7 +249,7 @@ export function ImagierGame() {
               {soundEnabled ? '🔊' : '🔇'}
             </button>
 */}
-            <h1 className="text-4xl font-bold text-pink">Trouve le mot correspondant à l'image</h1>
+            <h1 className="text-4xl font-bold text-pink">Ecrit le mot correspondant à l'image</h1>
 {/*            <button onClick={() => {playClickSound(); navigate('/rewards')}} 
               className="text-lg btn-secondary"
             >
@@ -257,7 +257,7 @@ export function ImagierGame() {
             </button>
 */}
           </div>
-          <button onClick={() => {playClickSound(); navigate('/imagier')}} className="btn-secondary">Retour</button>
+          <button onClick={() => {playClickSound(); navigate('/write')}} className="btn-secondary">Retour</button>
         </div>
         {loading ? (
           <p className="text-lg text-gray-600">Chargement des images...</p>

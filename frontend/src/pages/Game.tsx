@@ -5,7 +5,7 @@ import { playClickSound } from '../lib/sound'
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 
-export function Rewards() {
+export function Game() {
   const navigate = useNavigate();
   const gameProgress = useStore((state) => state.gameProgress);
   const soundEnabled = useStore(state => state.soundEnabled)
@@ -32,27 +32,38 @@ export function Rewards() {
 
   return (
     <div className="min-h-screen bg-background px-4 py-8">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto text-center">
-
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          {bgmUrl && (<audio src={bgmUrl} autoPlay loop muted={!soundEnabled} className="hidden" />)}
+{/*          {bgmUrl && (<audio src={bgmUrl} autoPlay loop muted={!soundEnabled} className="hidden" />)}
 
-          <div className="flex flex-col items-start">
-{/*            <button
-              onClick={toggle}
-              className="text-xl p-2"
-              aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
+          <button
+            onClick={toggle}
+            className="text-xl p-2"
+            aria-label={soundEnabled ? 'Couper le son' : 'Activer le son'}
+          >
+            {soundEnabled ? '🔊' : '🔇'}
+          </button>
+*/}          
+          <div>
+            <h1 className="text-4xl font-bold text-pink">Mini jeu</h1>
+{/*            <button onClick={() => {playClickSound(); navigate('/rewards')}}
+              className="text-lg btn-secondary"
             >
-              {soundEnabled ? '🔊' : '🔇'}
+              Pièces d'or : {gameProgress?.score ?? 0}
             </button>
 */}
-            <h1 className="text-4xl font-bold text-pink mb-4">Récompenses</h1>
-{/*            <p className="text-lg mb-4">
-            Vous avez accumulé {gameProgress?.score ?? 0} pièces d'or !
-            </p>
-*/}
           </div>
-          <button onClick={() => {playClickSound(); navigate(-1)}} className="btn-secondary">Retour</button>
+          <button
+            onClick={() => {playClickSound(); navigate('/games')}}
+            className="btn-secondary"
+          >
+            Retour
+          </button>
+        </div>
+
+        <div className="card mb-6">
+          <p className="text-lg mb-4"><b>Sélectionne la bonne image</b></p>
+
         </div>
       </motion.div>
     </div>

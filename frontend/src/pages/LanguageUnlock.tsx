@@ -93,7 +93,7 @@ export default function LanguageUnlock() {
 
       if (updateError) throw updateError
 
-      navigate('/game')
+      navigate('/games')
     } catch (error: any) {
       console.error('Error activating language:', error)
       setError(error.message || 'Une erreur est survenue')
@@ -119,7 +119,7 @@ export default function LanguageUnlock() {
 */}
           <h1 className="text-4xl font-bold text-pink">Débloquer une langue</h1>
           <button
-            onClick={() => {playClickSound(); navigate('/game')}}
+            onClick={() => {playClickSound(); navigate('/games')}}
             className="btn-secondary"
           >
             Retour

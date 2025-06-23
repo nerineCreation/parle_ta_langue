@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useStore } from '../store';
 import { playClickSound } from '../lib/sound'
 
-export function Imagier() {
+export function Write() {
   const navigate = useNavigate();
   const [themes, setThemes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,7 +138,7 @@ export function Imagier() {
           </button>
 */}          
           <div>
-            <h1 className="text-4xl font-bold text-pink">Imagier</h1>
+            <h1 className="text-4xl font-bold text-pink">Ecriture</h1>
 {/*            <button onClick={() => {playClickSound(); navigate('/rewards')}}
               className="text-lg btn-secondary"
             >
@@ -155,7 +155,7 @@ export function Imagier() {
         </div>
 
         <div className="card mb-6">
-          <p className="text-lg mb-4"><b>Bienvenue dans l'imagier !</b></p>
+          <p className="text-lg mb-4"><b>Bienvenue dans l'atelier d'écriture !</b></p>
           {loading ? (
             <p className="text-center text-gray-600">Chargement des thèmes...</p>
           ) : error ? (
@@ -169,7 +169,7 @@ export function Imagier() {
                   if (themeCount > 1) {
                     // Si plusieurs sous-thèmes, on affiche le détail du groupe
                     useStore.getState().setThemeGroup(theme.id); 
-                    navigate(`/imagier-theme-detail?theme=${theme.name}`);
+                    navigate(`/write-theme-detail?theme=${theme.name}`);
                   } else if (themeCount === 1) {
                     // Si un seul sous-thème, on recherche son ID dans la table "themes"
                     const { data, error } = await supabase
@@ -184,7 +184,7 @@ export function Imagier() {
                     }
                     
                     useStore.getState().setTheme(data.id);
-                    navigate(`/imagier-show`);
+                    navigate(`/write-game`);
                   } else {
                     console.warn("Aucun sous-thème disponible pour ce thème.");
                   }
