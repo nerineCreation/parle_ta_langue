@@ -101,7 +101,7 @@ export function ImagierGame() {
       const { data, error } = await supabase
         .from("images")
         .select("id, file_name, translate")
-        .eq("language_id", currentLanguage)
+        .eq("language_id", currentLanguage.id)
         .eq("theme_id", themeId)
         .limit(8);
 
