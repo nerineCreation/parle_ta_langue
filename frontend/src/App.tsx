@@ -7,6 +7,8 @@ import { ChildProfiles } from './pages/ChildProfiles'
 import { GameInterface } from './pages/GameInterface'
 import { Game } from './pages/Game'
 import { Read } from './pages/Read'
+import { Music } from './pages/Music'
+import { Media } from './pages/Media'
 import { Write } from './pages/Write'
 import { WriteThemeDetail } from './pages/WriteThemeDetail'
 import { WriteGame } from './pages/WriteGame'
@@ -34,11 +36,12 @@ function App() {
         <Route path="/profiles" element={<ProtectedRoute><ChildProfiles /></ProtectedRoute>} />
         <Route path="/games" element={<ProtectedRoute><GameInterface /></ProtectedRoute>} />
         <Route path="/game" element={<ProtectedRoute><Game /></ProtectedRoute>} />
+        <Route path="/read" element={<ProtectedRoute><Read /></ProtectedRoute>} />
+        <Route path="/music" element={<ProtectedRoute><Music /></ProtectedRoute>} />
+        <Route path="/media" element={<ProtectedRoute><Media /></ProtectedRoute>} />
 
         <Route path="/languages" element={<ProtectedRoute><LanguageManagement /></ProtectedRoute>} />
         <Route path="/language-unlock" element={<ProtectedRoute><LanguageUnlock /></ProtectedRoute>} />
-
-        <Route path="/read" element={<ProtectedRoute><Read /></ProtectedRoute>} />
 
         <Route path="/write" element={<ProtectedRoute><Write /></ProtectedRoute>} />
         <Route path="/write-theme-detail" element={<ProtectedRoute><WriteThemeDetail /></ProtectedRoute>} />
