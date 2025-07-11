@@ -144,7 +144,7 @@ export function ImagierShow() {
           ) : images.length === 0 ? (
             <p className="text-lg text-gray-600">Aucune image trouvée pour ce thème.</p>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 justify-center items-center">
               {images.map((image) => (
                 <motion.div
                   key={image.id}
