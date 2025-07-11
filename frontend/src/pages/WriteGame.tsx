@@ -14,7 +14,7 @@ interface WordData {
 export function WriteGame() {
   const navigate = useNavigate()
   const currentLanguage = useStore((state) => state.currentLanguage)
-  const themeId = useStore((state) => state.theme)
+//  const themeId = useStore((state) => state.theme)
   const [words, setWords] = useState<WordData[]>([])
   const [currentWord, setCurrentWord] = useState<WordData | null>(null)
   const [shuffledLetters, setShuffledLetters] = useState<string[]>([])
@@ -32,7 +32,7 @@ export function WriteGame() {
         .from('images')
         .select('id, translate, file_name')
         .eq('language_id', currentLanguage?.id)
-        .eq('theme_id', themeId);
+//        .eq('theme_id', themeId);
 
       if (error || !data || data.length === 0) {
         console.error('Erreur ou aucun mot trouvé :', error)
@@ -56,10 +56,10 @@ export function WriteGame() {
       pickRandomWord(formatted) // ✅ UN SEUL appel ici
     }
 
-    if (themeId && currentLanguage) {
+    if (currentLanguage) {
       fetchWords()
     }
-  }, [themeId, currentLanguage])
+  }, [currentLanguage])
 
   const pickRandomWord = (wordList = words) => {
     if (wordList.length === 0) return;
@@ -86,10 +86,11 @@ export function WriteGame() {
   const handleLetterClick = (letter: string, index: number) => {
     playClickSound()
     setFeedbackMessage(null) // ← Efface le message dès qu’on clique
-    const updated = [...shuffledLetters]
-    updated.splice(index, 1)
-    setShuffledLetters(updated)
-    setSelectedLetters((prev) => [...prev, letter])
+
+    setShuffledLetters(prev =>
+      prev.map((l, i) => (i === index ? "" : l))  // remplace la lettre par une chaîne vide
+    );
+    setSelectedLetters(prev => [...prev, letter]);
   }
 
   const resetGame = () => {
@@ -189,8 +190,10 @@ export function WriteGame() {
                     {shuffledLetters.map((letter, idx) => (
                       <button
                         key={idx}
-                        onClick={() => handleLetterClick(letter, idx)}
-                        className="bg-yellow-100 text-black rounded px-4 py-2 text-xl hover:bg-yellow-200"
+                        onClick={() => letter && handleLetterClick(letter, idx)}
+                        className={`rounded px-4 py-2 text-xl transition-all duration-200
+                          ${letter ? 'bg-yellow-100 text-black hover:bg-yellow-200' : 'invisible'}`}
+                        style={{ width: '3rem', height: '3rem' }} // fixe la taille pour éviter tout saut de ligne
                       >
                         {letter}
                       </button>

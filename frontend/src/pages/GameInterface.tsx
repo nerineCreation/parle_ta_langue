@@ -51,8 +51,9 @@ export function GameInterface() {
     const fetchActivities = async () => {
       const { data, error } = await supabase
         .from('activities')
-        .select('id, name, icon, path')
-        .eq('is_active', true);
+        .select('id, name, icon, path, orderby')
+        .eq('is_active', true)
+        .order('orderby');
 
       if (error) {
         console.error('Erreur lors de la récupération des activités :', error);
