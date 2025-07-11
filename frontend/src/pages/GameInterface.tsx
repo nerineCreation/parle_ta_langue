@@ -118,7 +118,7 @@ export function GameInterface() {
           </button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-center justify-center">
+        <div className="w-full grid grid-cols-2 sm:grid-cols-3 gap-4 items-center justify-center">
           {activities && activities.length > 0 ? (
             activities.map((activity) => (
               <motion.div
