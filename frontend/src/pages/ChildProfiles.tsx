@@ -5,6 +5,7 @@ import { useStore } from "../store";
 import { supabase } from "../lib/supabase";
 import type { ChildProfile } from "../types";
 import { playClickSound } from '../lib/sound'
+import { v4 as uuidv4 } from "uuid";
 
 export function ChildProfiles() {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ export function ChildProfiles() {
 
     try {
       const newChild: ChildProfile = {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         parent_id: user?.id || "",
         name,
         age_group: ageGroup,
