@@ -17,6 +17,17 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
     flowType: 'pkce',
   },
+  // AJOUT : Headers pour Supabase self-hosted
+  global: {
+    headers: {
+      'X-Client-Info': 'supabase-js-react'
+    }
+  }
 })
 
 // Supprimer le listener global pour éviter les conflits
+
+// AJOUT 2 : Debug
+if (import.meta.env.DEV) {
+  console.log('✅ Supabase configuré pour Parle Ta Langue')
+}
